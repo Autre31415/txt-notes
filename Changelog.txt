@@ -7,6 +7,7 @@
 - Add stylelint-config-standard dependency and use it for stylelint config
 - Add test script (Just linting for now)
 - Fix css linting (For the first time!)
+- Wipe out electron-quick-start readme
 
 10/24/18
 - File list refresh only happens when a txt is added or removed
