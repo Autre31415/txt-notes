@@ -1,0 +1,60 @@
+10/25/18
+- Update teddy to v0.4.27
+- Add .gitignore
+- Add husky dev dependency for precommit hooks
+- Add lint-staged dev dependency for precommit hooks
+- Add stylelint dev dependency for css linting
+- Add stylelint-config-standard dependency and use it for stylelint config
+- Add test script (Just linting for now)
+- Fix css linting (For the first time!)
+
+10/24/18
+- File list refresh only happens when a txt is added or removed
+- Reorganize templates
+- Fix memory leak related to context-menu event listeners
+- Update electron to v3.0.6
+- Update split.js to v1.5.6
+
+10/23/18
+- Slight tweaks to last modified date style
+
+10/21/18
+- Custom scrollbar
+- Tweak style for unsaved edits
+- Add more verbose code comments
+- Fix bug where file would sometimes be marked as edited after a refresh
+- Fix bug where app would go blank when base directory is deleted
+- Fix bug where app would load blank when base directory doesn't exist
+- Fix bug where change directory code would attempt to execute when clicking cancel on the directory picker
+- Fix bug where file with same name would be auto selected when changing base directory
+
+10/20/18
+- Update electron to v3.0.5
+- Update split.js to v1.5.5
+- Rejigger the color theme
+- Eliminate gutter line between file list and view
+- Eliminate ugly border lines between file names
+- Fix bug where escaping out of edited rename field would apply changes to the displayed file name
+- New/Rename file input redesign:
+  - Text box fills area
+  - Recolored
+  - Form validation (Checks blank, spaces only, and matching existing file name)
+
+10/18/18
+- Fix bug where refreshing would cause edits in progress to be lost
+- Added chokidar dependency which allows for real time refresh when files are added/removed from base directory
+- Fix bug where file was still considered in edit mode until cmd and s keys were released
+
+10/17/18:
+- Fix bug when choosing not to save when navigating away from an edited file
+- Fix textarea scrolling to the right
+- Clicking refresh keeps current selection including edits
+- Added 'copy file name' context menu item
+
+10/16/17:
+- Add form to select base directory
+- Add button to change base directory to main toolbar
+- Switch base directory config away from config.json to electron-store
+- Add electron-reload for dev mode
+- Update electron to v3.0.4
+- Update split.js to v1.5.4

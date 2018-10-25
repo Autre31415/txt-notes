@@ -1,0 +1,110 @@
+html,
+body,
+main {
+  margin: 0;
+  height: 100%;
+  font-family: Helvetica, sans-serif;
+}
+
+header {
+  background-color: #252526;
+}
+
+.split {
+  box-sizing: border-box;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.gutter {
+  background-color: #1e1e1e;
+}
+
+.gutter.gutter-horizontal {
+  cursor: col-resize;
+}
+
+.split.split-horizontal,
+.gutter.gutter-horizontal {
+  height: calc(100% - 21px);
+  float: left;
+}
+
+#txtFileList {
+  background-color: #252526;
+  color: #ccc;
+}
+
+#txtFileView {
+  background-color: #1e1e1e;
+}
+
+#txtFileView textarea {
+  width: calc(100% - 10px);
+  height: calc(100% - 36px);
+  padding: 5px;
+  border: 0;
+  margin: 0;
+  resize: none;
+  box-shadow: none;
+  font-size: 14px;
+  outline: none;
+  background-color: #1e1e1e;
+  color: white;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+ul li {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 5px;
+  font-size: 13px;
+  user-select: none;
+}
+
+.fileNameEdit {
+  width: calc(100% - 2px);
+  background-color: #3c3c3c;
+  color: white;
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+.highlight {
+  background-color: #0f517b !important;
+}
+
+.edited {
+  color: red;
+  font-weight: bold;
+}
+
+input:invalid {
+  border: 1px solid red;
+}
+
+input:valid {
+  border: 1px solid blue;
+}
+
+#lastModified {
+  margin: 0;
+  padding-top: 2px;
+  text-align: center;
+  color: gray;
+  font-size: 13px;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #363636;
+}

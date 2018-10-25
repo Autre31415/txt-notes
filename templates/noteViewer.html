@@ -1,0 +1,20 @@
+<!-- File viewer -->
+
+<header>
+  <input type='button' class='addRemove' id='addFile' value='➕' title='Crate a new file'>
+  <input type='button' class='addRemove' id='removeFile' value='✖️' title='Delete selected file'>
+  <input type='button' class='addRemove' id='saveFile' value='💾' title='Save file'>
+  <input type='button' class='addRemove' id='refreshButton' value='↻' title='Refresh'>
+  <input type='button' class='addRemove' id='changeBaseDir' value='📁' title='Change directory'>
+</header>
+<section id='txtFileList' class='split split-horizontal'>
+  <ul id='fileNames'>
+    <loop through='txtFiles' val='file'>
+      <li class='fileName'>{file.name}</li>
+    </loop>
+  </ul>
+</section>
+<section id='txtFileView' class='split split-horizontal'>
+  <p id='lastModified'></p>
+  <textarea></textarea>
+</section>
