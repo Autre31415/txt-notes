@@ -43,7 +43,7 @@
     rightClickCache = null
     currentFile = null
 
-    const template = fs.readFileSync('./firstLoad.html', 'utf8')
+    const template = fs.readFileSync(path.join(__dirname, 'templates/firstLoad.html'), 'utf8')
     let compiledTemplate = teddy.render(template)
     main.innerHTML = compiledTemplate
 
@@ -72,7 +72,7 @@
    * Start up the app using the selected base directory
    */
   function startApp () {
-    const template = fs.readFileSync('./templates/noteViewer.html', 'utf8')
+    const template = fs.readFileSync(path.join(__dirname, 'templates/noteViewer.html'), 'utf8')
     const model = {}
     let newTemplate
     let fileList
@@ -266,13 +266,11 @@
       watcher
         .on('add', (file) => {
           if (path.extname(file) === '.txt') {
-            console.log('Refresh happening')
             initView()
           }
         })
         .on('unlink', (file) => {
           if (path.extname(file) === '.txt') {
-            console.log('Refresh happening')
             initView()
           }
         })
@@ -613,8 +611,12 @@
         let prev = element.previousElementSibling
 
         if (event.key === 'ArrowDown' && next && next.tagName === 'LI') {
+          event.preventDefault()
+          next.scrollIntoView({ block: 'nearest' })
           next.click()
         } else if (event.key === 'ArrowUp' && prev && prev.tagName === 'LI') {
+          event.preventDefault()
+          prev.scrollIntoView({ block: 'nearest' })
           prev.click()
         }
       }
