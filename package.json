@@ -7,24 +7,33 @@
   "license": "CC0-1.0",
   "dependencies": {
     "chokidar": "2.0.4",
-    "electron-context-menu": "0.10.0",
+    "electron-context-menu": "0.10.1",
     "electron-store": "2.0.0",
-    "fs-extra": "7.0.0",
+    "fs-extra": "7.0.1",
     "klaw-sync": "6.0.0",
     "moment": "2.22.2",
-    "split.js": "1.5.6",
-    "teddy": "0.4.27"
+    "split.js": "1.5.9",
+    "teddy": "0.4.28"
   },
   "devDependencies": {
-    "electron": "3.0.6",
+    "electron": "3.0.9",
+    "electron-builder": "20.34.0",
     "electron-reloader": "0.2.0",
-    "husky": "1.1.2",
-    "lint-staged": "7.3.0",
+    "husky": "1.1.4",
+    "lint-staged": "8.0.4",
     "standard": "12.0.1",
-    "stylelint": "9.6.0",
+    "stylelint": "9.8.0",
     "stylelint-config-standard": "18.2.0"
   },
+  "build": {
+    "appId": "com.autre.txtnotes",
+    "mac": {
+      "category": "public.app-category.productivity"
+    }
+  },
   "scripts": {
+    "dist": "electron-builder",
+    "pack": "electron-builder --dir",
     "start": "electron .",
     "test": "standard && stylelint *.css"
   },
