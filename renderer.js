@@ -543,7 +543,7 @@
         let key = event.key
         let newFileName = event.target.value + '.txt'
 
-        if (key === 'Enter' && event.target.checkValidity() !== true) {
+        if (key === 'Enter' && event.target.checkValidity()) {
           let nowTime = moment().unix()
 
           // rename the file
