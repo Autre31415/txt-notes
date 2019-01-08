@@ -1,3 +1,19 @@
+1/7/19
+- Update electron to v4.0.1
+- Update electron-builder to 20.38.4
+- Update husky to v1.3.1
+- Fix bug where clicking add file button multiple times will spawn multiple name inputs
+- Fix bug where text editor would lose focus immediately after creating a new file
+
+12/18/18
+- Update moment to v2.23.0
+- Update split.js to v 1.5.10
+- Update electron to v3.0.13
+- Update electron-builder to v20.38.3
+- Update husky to v1.3.0
+- Update lint-staged to v8.1.0
+- Update stylelint to v9.9.0
+
 11/24/18
 - Fix ability to rename files
 

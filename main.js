@@ -12,13 +12,10 @@ let mainWindow
 
 function createWindow () {
   // Create the browser window.
-  mainWindow = new BrowserWindow({ width: 1400, height: 800 })
+  mainWindow = new BrowserWindow({ width: 1400, height: 800, webPreferences: { nodeIntegration: true } })
 
   // and load the main entrypoint (main.html)
   mainWindow.loadFile('./templates/main.html')
-
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {

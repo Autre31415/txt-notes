@@ -16,6 +16,7 @@
   let rightClickCache
   let lockSelection
   let currentFile
+  let addingFile
   let txtFiles = []
 
   // entry point
@@ -405,6 +406,13 @@
      * Event handler for clicking add file button
      */
     function addHandler () {
+      // track if a file name input already exists and disable the button if so
+      if (addingFile) {
+        return
+      }
+
+      addingFile = true
+
       let lineItem = document.createElement('li')
       let newFileInput = document.createElement('input')
 
@@ -429,6 +437,8 @@
         }
 
         if (key === 'Enter' && event.target.checkValidity()) {
+          event.preventDefault()
+
           let newFileValue = newFileInput.value
           let newFileName = newFileValue + '.txt'
           newFileInput.remove()
@@ -441,10 +451,21 @@
 
           lineItem.click()
 
-          fileViewer.focus()
+          /*
+          * For some reason the text editor for a new file is losing focus immediately after gaining it
+          * TODO: Find a better way to fix this
+          */
+          setTimeout(() => {
+            fileViewer.focus()
+          }, 100)
+
+          addingFile = false
         } else if (key === 'Escape') {
+          event.preventDefault()
+
           lockSelection = false
           lineItem.remove()
+          addingFile = false
         }
       })
     }
