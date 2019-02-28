@@ -1,4 +1,4 @@
-0.1.0 (2/26/19)
+0.1.0 (2/28/19)
 - Add native macOS menubar
   - Enables keyboard shortcuts for common features (e.g, copy, past, undo)
 - Add preliminary app icon
