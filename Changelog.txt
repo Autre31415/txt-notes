@@ -1,3 +1,16 @@
+0.1.0 (2/26/19)
+- Add native macOS menubar
+  - Enables keyboard shortcuts for common features (e.g, copy, past, undo)
+- Add preliminary app icon
+- Update electron to v4.0.6
+- Update chokidat to v2.1.2
+- Update electron-context-menu to v0.11.0
+- Update moment to v2.24.0
+- Update electron-builder to v20.38.5
+- Update huskt to v1.3.1
+- Update lint-staged to v8.1.4
+- Update stylelint to v9.10.1
+
 1/7/19
 - Update electron to v4.0.1
 - Update electron-builder to 20.38.4

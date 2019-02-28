@@ -17,6 +17,9 @@ function createWindow () {
   // and load the main entrypoint (main.html)
   mainWindow.loadFile('./templates/main.html')
 
+  // Create the menu
+  require('./menu.js')
+
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
     // Dereference the window object, usually you would store windows
