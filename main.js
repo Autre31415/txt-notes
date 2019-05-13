@@ -20,7 +20,8 @@ function createWindow () {
   // Create the menu
   require('./menu.js')
 
-  mainWindow.webContents.openDevTools()
+  /* Open dev tools */
+  // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
