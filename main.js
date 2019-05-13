@@ -3,7 +3,7 @@ const { app, BrowserWindow } = require('electron')
 
 // auto reload window in dev mode
 try {
-  require('electron-reloader')(module)
+  require('electron-reloader')(module, { ignore: 'tmp' })
 } catch (err) { }
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -19,6 +19,8 @@ function createWindow () {
 
   // Create the menu
   require('./menu.js')
+
+  mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
