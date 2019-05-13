@@ -12,12 +12,23 @@
   const main = document.getElementsByTagName('main')[0]
   const Store = require('electron-store')
   const store = new Store()
+  let isDev
   let baseDir = store.get('baseDir')
   let rightClickCache
   let lockSelection
   let currentFile
   let addingFile
   let txtFiles = []
+
+  // set baseDir to local directory in dev mode
+  try {
+    isDev = require('electron-is-dev')
+
+    if (isDev) {
+      fs.ensureDirSync(('./tmp'))
+      baseDir = './tmp'
+    }
+  } catch (err) {}
 
   // entry point
   configCheck()
@@ -58,7 +69,7 @@
     function chooseDirHandler () {
       dialog.showOpenDialog({
         properties: ['openDirectory']
-      }, (filePath) => {
+      }, filePath => {
         let selectedBaseDir = filePath[0]
 
         store.set('baseDir', selectedBaseDir)
@@ -83,7 +94,7 @@
 
     // hook up Electron context menu
     contextMenu({
-      prepend: (params, browserWindow) => [
+      prepend: (defaultActions, params, browserWindow) => [
         {
           label: 'Copy File Name',
           visible: elementIsFile(params.x, params.y),
@@ -152,7 +163,6 @@
      * Initialize main app view
      */
     function initView () {
-      const baseDir = store.get('baseDir')
       let editedFileCache
       let watcher
 
@@ -265,17 +275,17 @@
       })
 
       watcher
-        .on('add', (file) => {
+        .on('add', file => {
           if (path.extname(file) === '.txt') {
             initView()
           }
         })
-        .on('unlink', (file) => {
+        .on('unlink', file => {
           if (path.extname(file) === '.txt') {
             initView()
           }
         })
-        .on('unlinkDir', (file) => {
+        .on('unlinkDir', file => {
           if (file === baseDir) {
             watcher.close()
             startAppBaseForm()
@@ -315,7 +325,7 @@
     function fileClickHandler (event) {
       let element
 
-      if (!lockSelection && (!currentFile || currentFile.element !== event.target)) {
+      if (!lockSelection && (!currentFile || `${currentFile.name}.txt` !== `${event.target.innerHTML}.txt`)) {
         element = event.target
 
         // bring up save dialog when navigating away from edited file
@@ -605,18 +615,29 @@
       let input = event.target
       let possibleFileName = input.value + '.txt'
       let possiblePath = path.join(baseDir, possibleFileName)
+      let valid = true
 
+      // ensure file name isn't blank
       if (input.value.trim() === '') {
         input.setCustomValidity('Please enter a file name')
-      } else {
-        input.setCustomValidity('')
+        valid = false
       }
 
+      // ensure file name doesn't match another file
       if (input.value !== oldFileName) {
         if (fileExists(possiblePath)) {
           input.setCustomValidity('This file matches another file')
+          valid = false
         }
-      } else {
+      }
+
+      // ensure file name doesn't include invalid character
+      if (/[<>:"/\\|?*]/.test(input.value)) {
+        input.setCustomValidity('This name includes an illegal character')
+        valid = false
+      }
+
+      if (valid) {
         input.setCustomValidity('')
       }
     }
@@ -694,13 +715,14 @@
   }
 
   /**
-     * Helper functions
-     */
+   * Helper functions
+   */
 
   /**
    * Determine if element is a file name by coordinate
    * @param {number} x - X axis coordinate of document
    * @param {number} y - Y axis coordinate of document
+   * @returns {boolean} - If element is a file in the list
    */
   function elementIsFile (x, y) {
     let element = document.elementsFromPoint(x, y)[0]
@@ -722,6 +744,7 @@
    * Determine if element is inside the file list by coordinate
    * @param {number} x - X axis coordinate of document
    * @param {number} y - Y axis coordinate of document
+   * @returns {boolean} - If element is the file list
    */
   function elementIsFileList (x, y) {
     let elements = document.elementsFromPoint(x, y)
@@ -738,6 +761,7 @@
   /**
    * Check if a file exists
    * @param {string} path - Path to file
+   * @returns {boolean} - If file exists at path
    */
   function fileExists (path) {
     try {
@@ -752,6 +776,7 @@
    * Array comparison function that sorts array of files by date
    * @param {object} a - Array indice
    * @param {object} b - Array indice
+   * @return {number} - Array sorting index
    */
   function sortByDate (a, b) {
     if (a.dateCode > b.dateCode) {
