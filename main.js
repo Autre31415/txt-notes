@@ -1,5 +1,6 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow } = require('electron')
+const windowStateKeeper = require('electron-window-state')
 
 // auto reload window in dev mode
 try {
@@ -11,8 +12,21 @@ try {
 let mainWindow
 
 function createWindow () {
+  let mainWindowState = windowStateKeeper({
+    defaultWidth: 1400,
+    defaultHeight: 800
+  })
+
   // Create the browser window.
-  mainWindow = new BrowserWindow({ width: 1400, height: 800, webPreferences: { nodeIntegration: true } })
+  mainWindow = new BrowserWindow({
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  })
 
   // and load the main entrypoint (main.html)
   mainWindow.loadFile('./templates/main.html')
@@ -22,6 +36,8 @@ function createWindow () {
 
   /* Open dev tools */
   // mainWindow.webContents.openDevTools()
+
+  mainWindowState.manage(mainWindow)
 
   // Emitted when the window is closed.
   mainWindow.on('closed', function () {
