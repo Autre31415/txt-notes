@@ -1,3 +1,14 @@
+0.1.2 (6/5/19)
+- Auto select previously selected file on launch
+- Added electron-window-state to persist window size/position
+- Update electron to v5.0.2
+- Update chokidar to v3.0.1
+- Update split.js to v1.5.11
+- Update electron-builder to v20.43.0
+- Update electron-reloader to v0.3.0
+- Update husky to v2.4.0
+- Update lint-staged to v8.1.7
+
 0.1.1 (5/13/19)
 - Auto configures base directory to ./tmp in dev mode
 - File name validation checks for illegal characters

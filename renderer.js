@@ -20,6 +20,58 @@
   let addingFile
   let txtFiles = []
 
+  /**
+   * Class representing the currently selected file
+   */
+  class SelectedFile {
+    /**
+     * Initialize file selection
+     * @param {object} file - Element representing a file
+     */
+    constructor (file) {
+      this.element = file
+      this.name = file.innerHTML + '.txt'
+      this.content = fs.readFileSync(path.join(baseDir, this.name), 'utf8')
+      this.modifyDate = fs.statSync(path.join(baseDir, this.name)).mtimeMs
+      this.edited = false
+
+      // save reference to newly selected file
+      store.set('lastFile', this.name)
+    }
+
+    /**
+     * Set a new element to represent selected file
+     * @param {object} element - Element representing a file
+     */
+    setElement (element) {
+      this.element = element
+    }
+
+    /**
+     * Set a new representation of file content
+     * @param {string} newContent - The new file content
+     */
+    setContent (newContent) {
+      this.content = newContent
+    }
+
+    /**
+     * Set a new last modified time for file
+     * @param {string} newDate - Unix datestamp
+     */
+    setModifyDate (newDate) {
+      this.modifyDate = newDate
+    }
+
+    /**
+     * Set editing status of file
+     * @param {boolean} param - Whether or not there is file editing in progress
+     */
+    setEdited (param) {
+      this.edited = param
+    }
+  }
+
   // set baseDir to local directory in dev mode
   try {
     isDev = require('electron-is-dev')
@@ -267,6 +319,24 @@
 
       // bind event listener for arrow file navigation
       window.addEventListener('keydown', keySelectionHandler)
+
+      // select last opened file before close if one exists
+      if (store.get('lastFile')) {
+        let lastFileInnerText = store.get('lastFile').slice(0, -4)
+        let found
+
+        for (let file of fileList) {
+          if (file.innerHTML === lastFileInnerText) {
+            file.click()
+            found = true
+          }
+        }
+
+        // if last selected file doesn't exist, remove record of it
+        if (!found) {
+          store.delete('lastFile')
+        }
+      }
 
       // watch for file changes in base directory
       watcher = chokidar.watch(baseDir, {
@@ -661,55 +731,6 @@
           prev.scrollIntoView({ block: 'nearest' })
           prev.click()
         }
-      }
-    }
-
-    /**
-     * Class representing the currently selected file
-     */
-    class SelectedFile {
-      /**
-       * Initialize file selection
-       * @param {object} file - Element representing a file
-       */
-      constructor (file) {
-        this.element = file
-        this.name = file.innerHTML + '.txt'
-        this.content = fs.readFileSync(path.join(baseDir, this.name), 'utf8')
-        this.modifyDate = fs.statSync(path.join(baseDir, this.name)).mtimeMs
-        this.edited = false
-      }
-
-      /**
-       * Set a new element to represent selected file
-       * @param {object} element - Element representing a file
-       */
-      setElement (element) {
-        this.element = element
-      }
-
-      /**
-       * Set a new representation of file content
-       * @param {string} newContent - The new file content
-       */
-      setContent (newContent) {
-        this.content = newContent
-      }
-
-      /**
-       * Set a new last modified time for file
-       * @param {string} newDate - Unix datestamp
-       */
-      setModifyDate (newDate) {
-        this.modifyDate = newDate
-      }
-
-      /**
-       * Set editing status of file
-       * @param {boolean} param - Whether or not there is file editing in progress
-       */
-      setEdited (param) {
-        this.edited = param
       }
     }
   }
