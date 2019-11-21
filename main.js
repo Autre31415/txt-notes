@@ -12,7 +12,7 @@ try {
 let mainWindow
 
 function createWindow () {
-  let mainWindowState = windowStateKeeper({
+  const mainWindowState = windowStateKeeper({
     defaultWidth: 1400,
     defaultHeight: 800
   })
