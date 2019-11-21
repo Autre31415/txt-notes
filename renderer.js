@@ -108,7 +108,7 @@
     currentFile = null
 
     const template = fs.readFileSync(path.join(__dirname, 'templates/firstLoad.html'), 'utf8')
-    let compiledTemplate = teddy.render(template)
+    const compiledTemplate = teddy.render(template)
     main.innerHTML = compiledTemplate
 
     const dirPicker = document.getElementById('dirPicker')
@@ -122,7 +122,7 @@
       dialog.showOpenDialog({
         properties: ['openDirectory']
       }, filePath => {
-        let selectedBaseDir = filePath[0]
+        const selectedBaseDir = filePath[0]
 
         store.set('baseDir', selectedBaseDir)
         baseDir = selectedBaseDir
@@ -216,7 +216,6 @@
      */
     function initView () {
       let editedFileCache
-      let watcher
 
       if (currentFile && currentFile.edited) {
         editedFileCache = fileViewer.value
@@ -237,7 +236,7 @@
       klawSync(baseDir, { depthLimit: 0 }).forEach(file => {
         if (file.path.includes('.txt')) {
           // chop off the .txt for the view
-          let fileName = path.basename(file.path).slice(0, -4)
+          const fileName = path.basename(file.path).slice(0, -4)
           txtFiles.push({
             name: fileName,
             dateCode: file.stats.mtimeMs,
@@ -264,7 +263,7 @@
       if (currentFile) {
         // if a file was being edited before a refresh it needs to start out selected
         if (currentFile.edited) {
-          for (let file of fileList) {
+          for (const file of fileList) {
             if (file.innerHTML === currentFile.element.innerHTML) {
               currentFile.setElement(file)
               currentFile.element.classList.add('highlight')
@@ -275,7 +274,7 @@
             }
           }
         } else {
-          for (let file of fileList) {
+          for (const file of fileList) {
             if (file.innerHTML === currentFile.element.innerHTML) {
               fileViewer.value = currentFile.content
               currentFile.setElement(file)
@@ -288,11 +287,11 @@
       }
 
       // grab a reference to add/remove buttons
-      let addButton = document.getElementById('addFile')
-      let removeButton = document.getElementById('removeFile')
-      let saveButton = document.getElementById('saveFile')
-      let refreshButton = document.getElementById('refreshButton')
-      let baseDirButton = document.getElementById('changeBaseDir')
+      const addButton = document.getElementById('addFile')
+      const removeButton = document.getElementById('removeFile')
+      const saveButton = document.getElementById('saveFile')
+      const refreshButton = document.getElementById('refreshButton')
+      const baseDirButton = document.getElementById('changeBaseDir')
 
       // bind click handlers to each file in the list
       fileList.forEach(fileName => {
@@ -322,10 +321,10 @@
 
       // select last opened file before close if one exists
       if (store.get('lastFile')) {
-        let lastFileInnerText = store.get('lastFile').slice(0, -4)
+        const lastFileInnerText = store.get('lastFile').slice(0, -4)
         let found
 
-        for (let file of fileList) {
+        for (const file of fileList) {
           if (file.innerHTML === lastFileInnerText) {
             file.click()
             found = true
@@ -339,7 +338,7 @@
       }
 
       // watch for file changes in base directory
-      watcher = chokidar.watch(baseDir, {
+      const watcher = chokidar.watch(baseDir, {
         ignored: /(^|[/\\])\../,
         ignoreInitial: true
       })
@@ -493,8 +492,8 @@
 
       addingFile = true
 
-      let lineItem = document.createElement('li')
-      let newFileInput = document.createElement('input')
+      const lineItem = document.createElement('li')
+      const newFileInput = document.createElement('input')
 
       lockSelection = true
 
@@ -510,7 +509,7 @@
 
       newFileInput.addEventListener('input', fileNameValidation)
       newFileInput.addEventListener('keyup', event => {
-        let key = event.key
+        const key = event.key
 
         if (event.target.value.trim() === '') {
           event.target.setCustomValidity('Please enter a file name')
@@ -519,8 +518,8 @@
         if (key === 'Enter' && event.target.checkValidity()) {
           event.preventDefault()
 
-          let newFileValue = newFileInput.value
-          let newFileName = newFileValue + '.txt'
+          const newFileValue = newFileInput.value
+          const newFileName = newFileValue + '.txt'
           newFileInput.remove()
           lineItem.classList.add('fileName')
           lineItem.innerHTML = newFileValue
@@ -555,8 +554,8 @@
      */
     function removeHandler () {
       if (rightClickCache || currentFile) {
-        let elementToDelete = rightClickCache || currentFile.element
-        let selectedFileName = elementToDelete.innerHTML + '.txt'
+        const elementToDelete = rightClickCache || currentFile.element
+        const selectedFileName = elementToDelete.innerHTML + '.txt'
 
         dialog.showMessageBox({
           type: 'question',
@@ -591,7 +590,7 @@
         properties: ['openDirectory']
       }, (filePath) => {
         if (filePath) {
-          let selectedBaseDir = filePath[0]
+          const selectedBaseDir = filePath[0]
 
           store.set('baseDir', selectedBaseDir)
           baseDir = selectedBaseDir
@@ -617,9 +616,9 @@
      * Event handler for clicking rename file context menu item
      */
     function renameFileHandler () {
-      let element = rightClickCache
-      let oldFileName = element.innerHTML + '.txt'
-      let fileRenameInput = document.createElement('input')
+      const element = rightClickCache
+      const oldFileName = element.innerHTML + '.txt'
+      const fileRenameInput = document.createElement('input')
 
       lockSelection = true
 
@@ -641,11 +640,11 @@
        * @param {object} event - Keydown event
        */
       function renameConfirmHandler (event) {
-        let key = event.key
-        let newFileName = event.target.value + '.txt'
+        const key = event.key
+        const newFileName = event.target.value + '.txt'
 
         if (key === 'Enter' && event.target.checkValidity()) {
-          let nowTime = moment().unix()
+          const nowTime = moment().unix()
 
           // rename the file
           fs.renameSync(path.join(baseDir, oldFileName), path.join(baseDir, newFileName))
@@ -682,9 +681,9 @@
      * @param {string} oldFileName - If renaming a file, the original name is valid
      */
     function fileNameValidation (event, oldFileName) {
-      let input = event.target
-      let possibleFileName = input.value + '.txt'
-      let possiblePath = path.join(baseDir, possibleFileName)
+      const input = event.target
+      const possibleFileName = input.value + '.txt'
+      const possiblePath = path.join(baseDir, possibleFileName)
       let valid = true
 
       // ensure file name isn't blank
@@ -718,9 +717,9 @@
      */
     function keySelectionHandler (event) {
       if (currentFile && event.target.tagName !== 'TEXTAREA') {
-        let element = currentFile.element
-        let next = element.nextElementSibling
-        let prev = element.previousElementSibling
+        const element = currentFile.element
+        const next = element.nextElementSibling
+        const prev = element.previousElementSibling
 
         if (event.key === 'ArrowDown' && next && next.tagName === 'LI') {
           event.preventDefault()
@@ -730,6 +729,9 @@
           event.preventDefault()
           prev.scrollIntoView({ block: 'nearest' })
           prev.click()
+        } else if (event.key === 'ArrowRight') {
+          fileViewer.focus()
+          fileViewer.setSelectionRange(fileViewer.value.length, fileViewer.value.length)
         }
       }
     }
@@ -746,7 +748,7 @@
    * @returns {boolean} - If element is a file in the list
    */
   function elementIsFile (x, y) {
-    let element = document.elementsFromPoint(x, y)[0]
+    const element = document.elementsFromPoint(x, y)[0]
 
     if (lockSelection) {
       return false
@@ -768,9 +770,9 @@
    * @returns {boolean} - If element is the file list
    */
   function elementIsFileList (x, y) {
-    let elements = document.elementsFromPoint(x, y)
+    const elements = document.elementsFromPoint(x, y)
 
-    for (let element of elements) {
+    for (const element of elements) {
       if (element.id === 'txtFileList') {
         return true
       }
