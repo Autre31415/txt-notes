@@ -121,13 +121,15 @@
     function chooseDirHandler () {
       dialog.showOpenDialog({
         properties: ['openDirectory']
-      }, filePath => {
-        const selectedBaseDir = filePath[0]
+      }).then(result => {
+        if (result.filePaths[0]) {
+          const selectedBaseDir = result.filePaths[0]
 
-        store.set('baseDir', selectedBaseDir)
-        baseDir = selectedBaseDir
+          store.set('baseDir', selectedBaseDir)
+          baseDir = selectedBaseDir
 
-        startApp()
+          startApp()
+        }
       })
     }
   }
@@ -193,11 +195,11 @@
           title: 'Confirm',
           buttons: ['Yes', 'No', 'Cancel'],
           message: `Would you like to save ${currentFile.name} before closing?`
-        }, response => {
-          if (response === 0) { // yes
+        }).then(result => {
+          if (result.response === 0) { // yes
             saveFile()
             remote.app.exit()
-          } else if (response === 2) { // cancel
+          } else if (result.response === 2) { // cancel
             return false
           } else {
             remote.app.exit()
@@ -403,8 +405,8 @@
             type: 'question',
             buttons: ['No', 'Yes'],
             message: `Would you like to save ${currentFile.name}?`
-          }, response => {
-            if (response === 1) {
+          }).then(result => {
+            if (result.response === 1) {
               saveFile()
               fileSelection()
             } else {
@@ -561,8 +563,8 @@
           type: 'question',
           buttons: ['No', 'Yes'],
           message: `Are you sure you want to delete ${selectedFileName}?`
-        }, response => {
-          if (response === 1) {
+        }).then(result => {
+          if (result.response === 1) {
             elementToDelete.remove()
             if (elementToDelete === currentFile.element) {
               fileViewer.value = ''
@@ -588,9 +590,9 @@
     function baseDirHandler () {
       dialog.showOpenDialog({
         properties: ['openDirectory']
-      }, (filePath) => {
-        if (filePath) {
-          const selectedBaseDir = filePath[0]
+      }).then(result => {
+        if (result.filePaths[0]) {
+          const selectedBaseDir = result.filePaths[0]
 
           store.set('baseDir', selectedBaseDir)
           baseDir = selectedBaseDir
