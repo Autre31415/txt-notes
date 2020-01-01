@@ -291,7 +291,7 @@
       // grab a reference to add/remove buttons
       const addButton = document.getElementById('addFile')
       const removeButton = document.getElementById('removeFile')
-      const saveButton = document.getElementById('saveFile')
+      // const saveButton = document.getElementById('saveFile')
       const refreshButton = document.getElementById('refreshButton')
       const baseDirButton = document.getElementById('changeBaseDir')
 
@@ -314,7 +314,7 @@
       // bind click handlers to buttons
       removeButton.addEventListener('click', removeHandler)
       addButton.addEventListener('click', addHandler)
-      saveButton.addEventListener('click', saveButtonHandler)
+      // saveButton.addEventListener('click', saveButtonHandler)
       refreshButton.addEventListener('click', refreshButtonHandler)
       baseDirButton.addEventListener('click', baseDirHandler)
 
@@ -477,11 +477,11 @@
     /**
      * Event handler for clicking save file button
      */
-    function saveButtonHandler () {
-      if (currentFile && currentFile.element.className.includes('edited')) {
-        saveFile()
-      }
-    }
+    // function saveButtonHandler () {
+    //   if (currentFile && currentFile.element.className.includes('edited')) {
+    //     saveFile()
+    //   }
+    // }
 
     /**
      * Event handler for clicking add file button
