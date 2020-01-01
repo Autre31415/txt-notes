@@ -1,3 +1,6 @@
+0.1.5 (1/1/20)
+- Redesign button UI
+
 0.1.4 (12/16/19)
 - Fix broken dialogs
 - Update lint-staged to v9.5.0

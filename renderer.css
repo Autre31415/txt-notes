@@ -7,7 +7,49 @@ main {
 }
 
 header {
-  background-color: #252526;
+  background-color: #2b2f31;
+  height: 35px;
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+}
+
+nav {
+  margin-left: 75px;
+}
+
+button {
+  background-color: #454545;
+  color: #fff;
+  font-weight: 700;
+  height: 25px;
+  width: 25px;
+  border: none;
+  border-radius: 5px;
+  background-size: 15px;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-top: 6px;
+  outline: none;
+}
+
+button:active {
+  background-color: #757575;
+}
+
+#addFile {
+  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 42 42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m37.059 16h-11.059v-11.059c0-2.717-2.282-4.941-5-4.941s-5 2.224-5 4.941v11.059h-11.059c-2.717 0-4.941 2.282-4.941 5s2.224 5 4.941 5h11.059v11.059c0 2.717 2.282 4.941 5 4.941s5-2.224 5-4.941v-11.059h11.059c2.717 0 4.941-2.282 4.941-5s-2.224-5-4.941-5z"/></svg>');
+}
+
+#removeFile {
+  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 42 42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m37.059 16h-11.059-10-11.059c-2.717 0-4.941 2.282-4.941 5s2.224 5 4.941 5h11.059 10 11.059c2.717 0 4.941-2.282 4.941-5s-2.224-5-4.941-5z"/></svg>');
+}
+
+#refreshButton {
+  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 32 32" height="32" viewBox="0 0 32 32" width="32" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m28 16c-1.219 0-1.797.859-2 1.766-.731 3.264-3.833 8.234-10 8.234-5.523 0-10-4.478-10-10s4.477-10 10-10c2.24 0 4.295.753 5.96 2h-1.96c-1.104 0-2 .896-2 2s.896 2 2 2h6c1.104 0 2-.896 2-2v-6c0-1.104-.896-2-2-2s-2 .896-2 2v.518c-2.267-1.586-5.023-2.518-8-2.518-7.732 0-14 6.268-14 14s6.268 14 14 14c9.979 0 14-9.5 14-11.875 0-1.453-1.062-2.125-2-2.125z"/></svg>');
+}
+
+#changeBaseDir {
+  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 510 510" height="510" viewBox="0 0 510 510" width="510" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m204 51h-153c-28.05 0-51 22.95-51 51v306c0 28.05 22.95 51 51 51h408c28.05 0 51-22.95 51-51v-255c0-28.05-22.95-51-51-51h-204z"/></svg>');
 }
 
 .split {
@@ -26,7 +68,7 @@ header {
 
 .split.split-horizontal,
 .gutter.gutter-horizontal {
-  height: calc(100% - 21px);
+  height: calc(100% - 35px);
   float: left;
 }
 

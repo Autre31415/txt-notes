@@ -1,11 +1,13 @@
 <!-- File viewer -->
 
 <header>
-  <input type='button' class='addRemove' id='addFile' value='➕' title='Crate a new file'>
-  <input type='button' class='addRemove' id='removeFile' value='✖️' title='Delete selected file'>
-  <input type='button' class='addRemove' id='saveFile' value='💾' title='Save file'>
-  <input type='button' class='addRemove' id='refreshButton' value='↻' title='Refresh'>
-  <input type='button' class='addRemove' id='changeBaseDir' value='📁' title='Change directory'>
+  <nav>
+    <button class='addRemove' id='addFile' title='Create a new file'></button>
+    <button class='addRemove' id='removeFile' title='Delete selected file'></button>
+    <!-- <button class='addRemove' id='saveFile' title='Save file'></button> -->
+    <button class='addRemove' id='refreshButton' title='Refresh'></button>
+    <button class='addRemove' id='changeBaseDir' title='Change directory'></button>
+  </nav>
 </header>
 <section id='txtFileList' class='split split-horizontal'>
   <ul id='fileNames'>
