@@ -25,7 +25,8 @@ function createWindow () {
     height: mainWindowState.height,
     webPreferences: {
       nodeIntegration: true
-    }
+    },
+    titleBarStyle: 'hiddenInset'
   })
 
   // and load the main entrypoint (main.html)
