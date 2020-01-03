@@ -7,7 +7,7 @@
   "license": "CC0-1.0",
   "dependencies": {
     "chokidar": "~3.3.1",
-    "electron-context-menu": "~0.15.1",
+    "electron-context-menu": "~0.15.2",
     "electron-store": "~5.1.0",
     "electron-window-state": "~5.0.3",
     "fs-extra": "~8.1.0",
@@ -17,13 +17,15 @@
     "teddy": "~0.4.28"
   },
   "devDependencies": {
-    "electron": "~7.1.5",
+    "electron": "~7.1.7",
     "electron-builder": "~21.2.0",
     "electron-reloader": "~0.3.0",
     "husky": "~3.1.0",
+    "mocha": "~6.2.2",
     "lint-staged": "~9.5.0",
+    "spectron": "~9.0.0",
     "standard": "~14.3.1",
-    "stylelint": "~12.0.0",
+    "stylelint": "~12.0.1",
     "stylelint-config-standard": "~19.0.0"
   },
   "build": {
@@ -35,8 +37,9 @@
   "scripts": {
     "dist": "electron-builder --mac",
     "pack": "electron-builder --dir",
+    "lint": "standard && stylelint *.css",
     "start": "electron .",
-    "test": "standard && stylelint *.css"
+    "test": "mocha"
   },
   "lint-staged": {
     "*.css": "stylelint",

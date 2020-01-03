@@ -1,11 +1,21 @@
-0.1.5 (1/1/20)
+# txt-notes Changelog
+
+## Next Version
+
+- Add github actions CI.
+- Add first automated test.
+
+## 0.1.5 (1/1/20)
+
 - Redesign button UI
 
-0.1.4 (12/16/19)
+## 0.1.4 (12/16/19)
+
 - Fix broken dialogs
 - Update lint-staged to v9.5.0
 
-0.1.3 (11/21/19)
+## 0.1.3 (11/21/19)
+
 - Add right arrow shortcut to enter files from list
 - Update electron to v7.1.2
 - Update chokidar to v3.3.0
@@ -19,7 +29,8 @@
 - Update stylelint to v12.0.0
 - Update stylelint-config-standard to v19.0.0
 
-0.1.2 (6/5/19)
+## 0.1.2 (6/5/19)
+
 - Auto select previously selected file on launch
 - Added electron-window-state to persist window size/position
 - Update electron to v5.0.2
@@ -30,7 +41,8 @@
 - Update husky to v2.4.0
 - Update lint-staged to v8.1.7
 
-0.1.1 (5/13/19)
+## 0.1.1 (5/13/19)
+
 - Auto configures base directory to ./tmp in dev mode
 - File name validation checks for illegal characters
 - Fix bug where renaming currently selected file makes it uneditable
@@ -45,7 +57,8 @@
 - Update stylelint to v10.0.1
 - Update stylelint-config-standard to v18.3.0
 
-0.1.0 (2/28/19)
+## 0.1.0 (2/28/19)
+
 - Add native macOS menubar
   - Enables keyboard shortcuts for common features (e.g, copy, past, undo)
 - Add preliminary app icon
@@ -58,14 +71,16 @@
 - Update lint-staged to v8.1.4
 - Update stylelint to v9.10.1
 
-1/7/19
+## 1/7/19
+
 - Update electron to v4.0.1
 - Update electron-builder to 20.38.4
 - Update husky to v1.3.1
 - Fix bug where clicking add file button multiple times will spawn multiple name inputs
 - Fix bug where text editor would lose focus immediately after creating a new file
 
-12/18/18
+## 12/18/18
+
 - Update moment to v2.23.0
 - Update split.js to v 1.5.10
 - Update electron to v3.0.13
@@ -74,10 +89,12 @@
 - Update lint-staged to v8.1.0
 - Update stylelint to v9.9.0
 
-11/24/18
+## 11/24/18
+
 - Fix ability to rename files
 
-11/15/18
+## 11/15/18
+
 - Update electron to v3.0.9
 - Update teddy to v0.4.28
 - Update husky to v1.1.4
@@ -87,19 +104,22 @@
 - Fix relativity of file paths
 - Fix file list scroll behavior when navigating with arrow keys
 
-11/07/18
+## 11/07/18
+
 - Update fs-extra to v7.0.1
 - Update split.js to v1.5.9
 - Update electron to v3.0.8
 - Update husky to v1.1.3
 
-10/31/18
+## 10/31/18
+
 - Update electron-context-menu to v0.10.1
 - Update split.js to v1.5.7
 - Update lint-staged to v8.0.4
 - Update stylelint to v9.7.1
 
-10/25/18
+## 10/25/18
+
 - Update teddy to v0.4.27
 - Add .gitignore
 - Add husky dev dependency for precommit hooks
@@ -110,17 +130,20 @@
 - Fix css linting (For the first time!)
 - Wipe out electron-quick-start readme
 
-10/24/18
+## 10/24/18
+
 - File list refresh only happens when a txt is added or removed
 - Reorganize templates
 - Fix memory leak related to context-menu event listeners
 - Update electron to v3.0.6
 - Update split.js to v1.5.6
 
-10/23/18
+## 10/23/18
+
 - Slight tweaks to last modified date style
 
-10/21/18
+## 10/21/18
+
 - Custom scrollbar
 - Tweak style for unsaved edits
 - Add more verbose code comments
@@ -130,7 +153,8 @@
 - Fix bug where change directory code would attempt to execute when clicking cancel on the directory picker
 - Fix bug where file with same name would be auto selected when changing base directory
 
-10/20/18
+## 10/20/18
+
 - Update electron to v3.0.5
 - Update split.js to v1.5.5
 - Rejigger the color theme
@@ -142,18 +166,21 @@
   - Recolored
   - Form validation (Checks blank, spaces only, and matching existing file name)
 
-10/18/18
+## 10/18/18
+
 - Fix bug where refreshing would cause edits in progress to be lost
 - Added chokidar dependency which allows for real time refresh when files are added/removed from base directory
 - Fix bug where file was still considered in edit mode until cmd and s keys were released
 
-10/17/18:
+## 10/17/18
+
 - Fix bug when choosing not to save when navigating away from an edited file
 - Fix textarea scrolling to the right
 - Clicking refresh keeps current selection including edits
 - Added 'copy file name' context menu item
 
-10/16/17:
+## 10/16/17
+
 - Add form to select base directory
 - Add button to change base directory to main toolbar
 - Switch base directory config away from config.json to electron-store
