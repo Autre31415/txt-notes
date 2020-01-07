@@ -33,7 +33,7 @@ function createWindow () {
   mainWindow.loadFile('./templates/main.html')
 
   // Create the menu
-  require('./menu.js')
+  require('./menu.js')(mainWindow)
 
   /* Open dev tools */
   // mainWindow.webContents.openDevTools()

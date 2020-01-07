@@ -14,7 +14,11 @@ header {
 }
 
 nav {
-  margin-left: 75px;
+  margin-left: 5px;
+}
+
+.darwin-nav {
+  margin-left: 80px;
 }
 
 button {
@@ -42,6 +46,10 @@ button:active {
 
 #removeFile {
   background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 42 42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m37.059 16h-11.059-10-11.059c-2.717 0-4.941 2.282-4.941 5s2.224 5 4.941 5h11.059 10 11.059c2.717 0 4.941-2.282 4.941-5s-2.224-5-4.941-5z"/></svg>');
+}
+
+#saveFile {
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m0 2c0-1.1.9-2 2-2h14l4 4v14a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2-2zm5 0v6h10v-6zm6 1h3v4h-3z"/></svg>');
 }
 
 #refreshButton {

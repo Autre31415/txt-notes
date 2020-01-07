@@ -178,6 +178,12 @@
     ipcRenderer.on('ping', (event, message) => {
       if (message === 'confirmClose') {
         confirmClose()
+      } else if (message === 'save') {
+        console.log('saving file....')
+        // only init save when the file was edited
+        if (currentFile.element.className.includes('edited')) {
+          saveFile()
+        }
       }
     })
 
@@ -255,6 +261,12 @@
       newTemplate = teddy.render(template, model)
       main.innerHTML = newTemplate
 
+      // style main navigation based on platform
+      const mainNav = document.querySelector('nav')
+      if (process.platform === 'darwin') {
+        mainNav.classList.add('darwin-nav')
+      }
+
       // grab a reference to file list and text area
       fileList = document.querySelectorAll('#fileNames li')
       fileViewer = document.querySelector('#txtFileView textarea')
@@ -291,7 +303,7 @@
       // grab a reference to add/remove buttons
       const addButton = document.getElementById('addFile')
       const removeButton = document.getElementById('removeFile')
-      // const saveButton = document.getElementById('saveFile')
+      const saveButton = document.getElementById('saveFile')
       const refreshButton = document.getElementById('refreshButton')
       const baseDirButton = document.getElementById('changeBaseDir')
 
@@ -307,14 +319,13 @@
         snapOffset: 0
       })
 
-      // bind event listeners for saving/editing in text area
-      fileViewer.addEventListener('keydown', fileSaveHandler)
+      // bind event listeners for editing in text area
       fileViewer.addEventListener('input', fileEditHandler)
 
       // bind click handlers to buttons
       removeButton.addEventListener('click', removeHandler)
       addButton.addEventListener('click', addHandler)
-      // saveButton.addEventListener('click', saveButtonHandler)
+      saveButton.addEventListener('click', saveButtonHandler)
       refreshButton.addEventListener('click', refreshButtonHandler)
       baseDirButton.addEventListener('click', baseDirHandler)
 
@@ -462,26 +473,13 @@
     }
 
     /**
-     * Event handler for keyboard shortcuts in main text editor
-     * @param {object} event - Keydown event
-     */
-    function fileSaveHandler (event) {
-      if (event.metaKey && event.key === 's') {
-        // only init save when the file was edited
-        if (currentFile.element.className.includes('edited')) {
-          saveFile()
-        }
-      }
-    }
-
-    /**
      * Event handler for clicking save file button
      */
-    // function saveButtonHandler () {
-    //   if (currentFile && currentFile.element.className.includes('edited')) {
-    //     saveFile()
-    //   }
-    // }
+    function saveButtonHandler () {
+      if (currentFile && currentFile.element.className.includes('edited')) {
+        saveFile()
+      }
+    }
 
     /**
      * Event handler for clicking add file button

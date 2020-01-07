@@ -2,8 +2,14 @@
 
 ## Next Version
 
-- Add github actions CI.
-- Add first automated test.
+- Add github actions CI
+- Add spectron/mocha for automated testing
+  - First proof of concept test in place
+- Bring back the save button
+- Better support for Windows:
+  - Proper file save menu item with accelerator
+  - Button row position accounts for platform
+- Update husky to v4.0.0
 
 ## 0.1.5 (1/1/20)
 
