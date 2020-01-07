@@ -1,6 +1,6 @@
 # txt-notes Changelog
 
-## Next Version
+## 0.1.6 (1/6/20)
 
 - Add github actions CI
 - Add spectron/mocha for automated testing
