@@ -1,6 +1,6 @@
 {
   "name": "txt-notes",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Manage txt files like the notes app",
   "main": "main.js",
   "author": "Troy Coutu",
@@ -35,7 +35,7 @@
     }
   },
   "scripts": {
-    "dist": "electron-builder --mac",
+    "dist": "electron-builder --mac --windows",
     "pack": "electron-builder --dir",
     "lint": "standard && stylelint *.css",
     "start": "electron .",
