@@ -1,11 +1,59 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const windowStateKeeper = require('electron-window-state')
 
 // auto reload window in dev mode
 try {
   require('electron-reloader')(module, { ignore: 'tmp' })
 } catch (err) { }
+
+// handle app exit
+ipcMain.handle('exit', () => {
+  app.exit()
+})
+
+// handle close confirmation dialog
+ipcMain.handle('confirmClose', async (event, fileName) => {
+  const result = await dialog.showMessageBox({
+    type: 'question',
+    title: 'Confirm',
+    buttons: ['Yes', 'No', 'Cancel'],
+    message: `Would you like to save ${fileName} before closing?`
+  })
+
+  return result
+})
+
+// handle navigate away confirmation dialog
+ipcMain.handle('confirmNavigateAway', async (event, fileName) => {
+  const result = await dialog.showMessageBox({
+    type: 'question',
+    buttons: ['No', 'Yes'],
+    message: `Would you like to save ${fileName}?`
+  })
+
+  return result
+})
+
+// handle file deletion confirmation dialog
+ipcMain.handle('removeHandler', async (event, fileName) => {
+  const result = await dialog.showMessageBox({
+    type: 'question',
+    buttons: ['No', 'Yes'],
+    message: `Are you sure you want to delete ${fileName}?`
+  })
+
+  return result
+})
+
+// handle directory picker dialog
+ipcMain.handle('directoryPicker', async (event, fileName) => {
+  const result = await dialog.showOpenDialog({
+    properties: ['openDirectory']
+  })
+
+  return result
+})
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
