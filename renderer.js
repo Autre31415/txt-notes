@@ -3,8 +3,7 @@
   const moment = require('moment')
   const klawSync = require('klaw-sync')
   const path = require('path')
-  const { clipboard, ipcRenderer, remote } = require('electron')
-  const { dialog } = remote
+  const { clipboard, ipcRenderer } = require('electron')
   const fs = require('fs-extra')
   const contextMenu = require('electron-context-menu')
   const chokidar = require('chokidar')
@@ -118,19 +117,17 @@
     /**
      * Event handler for directory picker button
      */
-    function chooseDirHandler () {
-      dialog.showOpenDialog({
-        properties: ['openDirectory']
-      }).then(result => {
-        if (result.filePaths[0]) {
-          const selectedBaseDir = result.filePaths[0]
+    async function chooseDirHandler () {
+      const result = await ipcRenderer.invoke('directoryPicker')
 
-          store.set('baseDir', selectedBaseDir)
-          baseDir = selectedBaseDir
+      if (result.filePaths[0]) {
+        const selectedBaseDir = result.filePaths[0]
 
-          startApp()
-        }
-      })
+        store.set('baseDir', selectedBaseDir)
+        baseDir = selectedBaseDir
+
+        startApp()
+      }
     }
   }
 
@@ -179,7 +176,6 @@
       if (message === 'confirmClose') {
         confirmClose()
       } else if (message === 'save') {
-        console.log('saving file....')
         // only init save when the file was edited
         if (currentFile.element.className.includes('edited')) {
           saveFile()
@@ -190,29 +186,26 @@
     /**
      * Event handler for closing out the app
      */
-    function confirmClose () {
+    async function confirmClose () {
       if (currentFile) {
+        // exit without intervention when no files are edited and unsaved
         if (!currentFile.element.className.includes('edited')) {
-          remote.app.exit()
+          await ipcRenderer.invoke('exit')
         }
 
-        dialog.showMessageBox({
-          type: 'question',
-          title: 'Confirm',
-          buttons: ['Yes', 'No', 'Cancel'],
-          message: `Would you like to save ${currentFile.name} before closing?`
-        }).then(result => {
-          if (result.response === 0) { // yes
-            saveFile()
-            remote.app.exit()
-          } else if (result.response === 2) { // cancel
-            return false
-          } else {
-            remote.app.exit()
-          }
-        })
+        // tell the main process to spin up a confirmation dialog
+        const result = await ipcRenderer.invoke('confirmClose', currentFile.name)
+
+        if (result.response === 0) { // yes
+          saveFile()
+          await ipcRenderer.invoke('exit')
+        } else if (result.response === 2) { // cancel
+          return false
+        } else {
+          await ipcRenderer.invoke('exit')
+        }
       } else {
-        remote.app.exit()
+        await ipcRenderer.invoke('exit')
       }
     }
 
@@ -404,7 +397,7 @@
      * Event handler for clicking a file in the list
      * @param {object} event - Click event
      */
-    function fileClickHandler (event) {
+    async function fileClickHandler (event) {
       let element
 
       if (!lockSelection && (!currentFile || `${currentFile.name}.txt` !== `${event.target.innerHTML}.txt`)) {
@@ -412,18 +405,15 @@
 
         // bring up save dialog when navigating away from edited file
         if (currentFile && currentFile.element.className.includes('edited')) {
-          dialog.showMessageBox({
-            type: 'question',
-            buttons: ['No', 'Yes'],
-            message: `Would you like to save ${currentFile.name}?`
-          }).then(result => {
-            if (result.response === 1) {
-              saveFile()
-              fileSelection()
-            } else {
-              fileSelection()
-            }
-          })
+          // spin up confirmation dialog
+          const result = await ipcRenderer.invoke('confirmNavigateAway', currentFile.name)
+
+          if (result.response === 1) {
+            saveFile()
+            fileSelection()
+          } else {
+            fileSelection()
+          }
         } else {
           fileSelection()
         }
@@ -552,26 +542,21 @@
     /**
      * Event handler for clicking remove file button
      */
-    function removeHandler () {
+    async function removeHandler () {
       if (rightClickCache || currentFile) {
         const elementToDelete = rightClickCache || currentFile.element
         const selectedFileName = elementToDelete.innerHTML + '.txt'
+        const result = await ipcRenderer.invoke('removeHandler', selectedFileName)
 
-        dialog.showMessageBox({
-          type: 'question',
-          buttons: ['No', 'Yes'],
-          message: `Are you sure you want to delete ${selectedFileName}?`
-        }).then(result => {
-          if (result.response === 1) {
-            elementToDelete.remove()
-            if (elementToDelete === currentFile.element) {
-              fileViewer.value = ''
-              lastModified.innerHTML = ''
-              currentFile = null
-            }
-            fs.unlinkSync(path.join(baseDir, selectedFileName))
+        if (result.response === 1) {
+          elementToDelete.remove()
+          if (elementToDelete === currentFile.element) {
+            fileViewer.value = ''
+            lastModified.innerHTML = ''
+            currentFile = null
           }
-        })
+          fs.unlinkSync(path.join(baseDir, selectedFileName))
+        }
       }
     }
 
@@ -585,20 +570,18 @@
     /**
      * Event handler for clicking change directory button
      */
-    function baseDirHandler () {
-      dialog.showOpenDialog({
-        properties: ['openDirectory']
-      }).then(result => {
-        if (result.filePaths[0]) {
-          const selectedBaseDir = result.filePaths[0]
+    async function baseDirHandler () {
+      const result = await ipcRenderer.invoke('directoryPicker')
 
-          store.set('baseDir', selectedBaseDir)
-          baseDir = selectedBaseDir
-          currentFile = null
+      if (result.filePaths[0]) {
+        const selectedBaseDir = result.filePaths[0]
 
-          initView()
-        }
-      })
+        store.set('baseDir', selectedBaseDir)
+        baseDir = selectedBaseDir
+        currentFile = null
+
+        initView()
+      }
     }
 
     /**

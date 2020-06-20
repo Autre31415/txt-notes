@@ -1,5 +1,28 @@
 # txt-notes Changelog
 
+## Next Version
+
+## 0.1.7 (6/20/20)
+
+- [Eliminate all usage of electron remote module](https://medium.com/@nornagon/electrons-remote-module-considered-harmful-70d69500f31)
+- Update electron to v9.0.4
+- Update chokidar to v3.4.0
+- Update electron-context-menu to v2.0.1
+- Update electron-store to v5.2.0
+- Updtate fs-extra to v9.0.1
+- Update moment to v2.27.0
+- Update split.js to v1.6.0
+- Update teddy to v0.5.3
+- Update electron-builder to v22.7.0
+- Update electron-reloader to v1.0.1
+- Update husky to v4.2.5
+- Update lint-staged to v10.2.11
+- Update mocha to v8.0.1
+- Update spectron to v11.0.0
+- Update standard to v14.3.4
+- Update stylelint to v13.6.1
+- Update stylelint-config-standard to v20.0.0
+
 ## 0.1.6 (1/6/20)
 
 - Add github actions CI
