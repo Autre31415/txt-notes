@@ -4,7 +4,7 @@
 
 ## 0.1.7 (6/20/20)
 
-- [Eliminate all usage of electron remote module](https://medium.com/@nornagon/electrons-remote-module-considered-harmful-70d69500f31)
+- [Eliminate usage of electron remote module](https://medium.com/@nornagon/electrons-remote-module-considered-harmful-70d69500f31)
 - Update electron to v9.0.4
 - Update chokidar to v3.4.0
 - Update electron-context-menu to v2.0.1
