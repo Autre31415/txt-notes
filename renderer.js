@@ -11,16 +11,39 @@
   const main = document.getElementsByTagName('main')[0]
   const Store = require('electron-store')
   const store = new Store()
-  let isDev
   let baseDir = store.get('baseDir')
+
+  // directory picker template
+  const dirPickerTemplate = fs.readFileSync(path.join(__dirname, 'templates/firstLoad.html'), 'utf8')
+
+  // main note viewer template
+  const mainTemplate = fs.readFileSync(path.join(__dirname, 'templates/noteViewer.html'), 'utf8')
+
+  // file currently being right clicked
   let rightClickCache
+
+  // when in file rename mode lock ability to select other files
   let lockSelection
+
+  // side panel that includes all the file names
   let fileNameContainer
+
+  // array of elements that refer to file names
   let fileList
+
+  // main text editor
   let fileViewer
+
+  // last modified field above the text editor
   let lastModified
+
+  // current selected file
   let currentFile
+
+  // app state when new file name is being typed
   let addingFile
+
+  // array of txt files in watched folder
   let txtFiles = []
 
   // hook up Electron context menu
@@ -55,7 +78,7 @@
       confirmClose()
     } else if (message === 'save') {
       // only init save when the file was edited
-      if (currentFile.element.className.includes('edited')) {
+      if (currentFile.edited) {
         saveFile()
       }
     }
@@ -67,7 +90,7 @@
   async function confirmClose () {
     if (currentFile) {
       // exit without intervention when no files are edited and unsaved
-      if (!currentFile.element.className.includes('edited')) {
+      if (!currentFile.edited) {
         await ipcRenderer.invoke('exit')
       }
 
@@ -141,13 +164,13 @@
 
   // set baseDir to local directory in dev mode
   try {
-    isDev = require('electron-is-dev')
+    const isDev = require('electron-is-dev')
 
     if (isDev) {
       fs.ensureDirSync(('./tmp'))
       baseDir = './tmp'
     }
-  } catch (err) {}
+  } catch () {}
 
   // entry point
   configCheck()
@@ -173,9 +196,12 @@
     txtFiles = []
     rightClickCache = null
     currentFile = null
+    fileNameContainer = null
+    fileList = null
+    fileViewer = null
+    lastModified = null
 
-    const template = fs.readFileSync(path.join(__dirname, 'templates/firstLoad.html'), 'utf8')
-    const compiledTemplate = teddy.render(template)
+    const compiledTemplate = teddy.render(dirPickerTemplate)
     main.innerHTML = compiledTemplate
   }
 
@@ -183,7 +209,6 @@
    * Main application view
    */
   function initView () {
-    const template = fs.readFileSync(path.join(__dirname, 'templates/noteViewer.html'), 'utf8')
     const model = {}
     main.innerHTML = ''
     let editedFileCache
@@ -221,7 +246,7 @@
 
     // store contents of files in model and render template with it
     model.txtFiles = txtFiles
-    const newTemplate = teddy.render(template, model)
+    const newTemplate = teddy.render(mainTemplate, model)
     main.innerHTML = newTemplate
 
     // style main navigation based on platform
@@ -287,30 +312,6 @@
         store.delete('lastFile')
       }
     }
-
-    // watch for file changes in base directory
-    const watcher = chokidar.watch(baseDir, {
-      ignored: /(^|[/\\])\../,
-      ignoreInitial: true
-    })
-
-    watcher
-      .on('add', file => {
-        if (path.extname(file) === '.txt') {
-          initView()
-        }
-      })
-      .on('unlink', file => {
-        if (path.extname(file) === '.txt') {
-          initView()
-        }
-      })
-      .on('unlinkDir', file => {
-        if (file === baseDir) {
-          watcher.close()
-          startAppBaseForm()
-        }
-      })
   }
 
   /**
@@ -365,6 +366,36 @@
       fileEditHandler(event)
     }
   })
+
+  // watch for file changes in base directory
+  const watcher = chokidar.watch(baseDir, {
+    ignored: /(^|[/\\])\../,
+    ignoreInitial: true
+  })
+
+  watcher
+    .on('add', file => {
+      if (fileViewer) {
+        if (path.extname(file) === '.txt') {
+          initView()
+        }
+      }
+    })
+    .on('unlink', file => {
+      if (fileViewer) {
+        if (path.extname(file) === '.txt') {
+          initView()
+        }
+      }
+    })
+    .on('unlinkDir', file => {
+      if (fileViewer) {
+        if (file === baseDir) {
+          watcher.close()
+          startAppBaseForm()
+        }
+      }
+    })
 
   /**
    * Event handlers
@@ -452,7 +483,7 @@
       element = event.target
 
       // bring up save dialog when navigating away from edited file
-      if (currentFile && currentFile.element.className.includes('edited')) {
+      if (currentFile && currentFile.edited) {
         // spin up confirmation dialog
         const result = await ipcRenderer.invoke('confirmNavigateAway', currentFile.name)
 
@@ -514,7 +545,7 @@
    * Event handler for clicking save file button
    */
   function saveButtonHandler () {
-    if (currentFile && currentFile.element.className.includes('edited')) {
+    if (currentFile && currentFile.edited) {
       saveFile()
     }
   }
