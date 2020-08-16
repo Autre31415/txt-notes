@@ -7,13 +7,12 @@
     <button class='addRemove' id='saveFile' title='Save file'></button>
     <button class='addRemove' id='refreshButton' title='Refresh'></button>
     <button class='addRemove' id='changeBaseDir' title='Change directory'></button>
+    <input type='text' id='search' placeholder='Search'>
   </nav>
 </header>
 <section id='txtFileList' class='split split-horizontal'>
   <ul id='fileNames'>
-    <loop through='txtFiles' val='file'>
-      <li class='fileName'>{file.name}</li>
-    </loop>
+    <include src='noteList'></include>
   </ul>
 </section>
 <section id='txtFileView' class='split split-horizontal'>

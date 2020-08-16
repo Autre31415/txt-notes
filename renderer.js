@@ -1,12 +1,12 @@
 (() => {
   const Split = require('split.js')
-  const moment = require('moment')
+  const chokidar = require('chokidar')
+  const dayjs = require('dayjs')
   const klawSync = require('klaw-sync')
   const path = require('path')
   const { clipboard, ipcRenderer } = require('electron')
   const fs = require('fs-extra')
   const contextMenu = require('electron-context-menu')
-  const chokidar = require('chokidar')
   const teddy = require('teddy')
   const main = document.getElementsByTagName('main')[0]
   const Store = require('electron-store')
@@ -18,6 +18,12 @@
 
   // main note viewer template
   const mainTemplate = fs.readFileSync(path.join(__dirname, 'templates/noteViewer.html'), 'utf8')
+
+  // note list partial template
+  const noteListTemplate = fs.readFileSync(path.join(__dirname, 'templates/noteList.html'), 'utf8')
+
+  // pre-compile noteList template
+  teddy.setTemplate('noteList.html', teddy.compile(noteListTemplate))
 
   // file currently being right clicked
   let rightClickCache
@@ -43,10 +49,19 @@
   // app state when new file name is being typed
   let addingFile
 
+  // search input
+  let searchInput
+
+  // array of txt files that meet search criteria
+  let searchFiles = []
+
   // array of txt files in watched folder
   let txtFiles = []
 
-  // hook up Electron context menu
+  // chokidar directory scanner instance
+  let watcher
+
+  // hook up the context menu
   contextMenu({
     prepend: (defaultActions, params, browserWindow) => [
       {
@@ -85,32 +100,6 @@
   })
 
   /**
-   * Event handler for closing out the app
-   */
-  async function confirmClose () {
-    if (currentFile) {
-      // exit without intervention when no files are edited and unsaved
-      if (!currentFile.edited) {
-        await ipcRenderer.invoke('exit')
-      }
-
-      // tell the main process to spin up a confirmation dialog
-      const result = await ipcRenderer.invoke('confirmClose', currentFile.name)
-
-      if (result.response === 0) { // yes
-        saveFile()
-        await ipcRenderer.invoke('exit')
-      } else if (result.response === 2) { // cancel
-        return false
-      } else {
-        await ipcRenderer.invoke('exit')
-      }
-    } else {
-      await ipcRenderer.invoke('exit')
-    }
-  }
-
-  /**
    * Class representing the currently selected file
    */
   class SelectedFile {
@@ -121,7 +110,7 @@
     constructor (file) {
       this.element = file
       this.name = file.innerHTML + '.txt'
-      this.content = fs.readFileSync(path.join(baseDir, this.name), 'utf8')
+      this.content = txtFiles.find(item => item.fileName === this.name).content
       this.modifyDate = fs.statSync(path.join(baseDir, this.name)).mtimeMs
       this.edited = false
 
@@ -143,6 +132,7 @@
      */
     setContent (newContent) {
       this.content = newContent
+      txtFiles.find(item => item.fileName === this.name).content = newContent
     }
 
     /**
@@ -151,6 +141,7 @@
      */
     setModifyDate (newDate) {
       this.modifyDate = newDate
+      txtFiles.find(item => item.fileName === this.name).dateCode = newDate
     }
 
     /**
@@ -170,7 +161,7 @@
       fs.ensureDirSync(('./tmp'))
       baseDir = './tmp'
     }
-  } catch () {}
+  } catch {}
 
   // entry point
   configCheck()
@@ -194,6 +185,7 @@
     // clear caches
     main.innerHTML = ''
     txtFiles = []
+    searchFiles = []
     rightClickCache = null
     currentFile = null
     fileNameContainer = null
@@ -210,16 +202,10 @@
    */
   function initView () {
     const model = {}
-    main.innerHTML = ''
-    let editedFileCache
-
-    if (currentFile && currentFile.edited) {
-      editedFileCache = fileViewer.value
-    }
 
     // clear caches
+    currentFile = null
     main.innerHTML = ''
-    txtFiles = []
     rightClickCache = null
 
     // kick back to directory picker form if base directory doesn't exist
@@ -228,21 +214,8 @@
       return
     }
 
-    // read all txt files in chosen directory
-    klawSync(baseDir, { depthLimit: 0 }).forEach(file => {
-      if (file.path.includes('.txt')) {
-        // chop off the .txt for the view
-        const fileName = path.basename(file.path).slice(0, -4)
-        txtFiles.push({
-          name: fileName,
-          dateCode: file.stats.mtimeMs,
-          dateString: file.stats.mtime
-        })
-      }
-    })
-
-    // sort files by modified date
-    txtFiles.sort(sortByDate)
+    // build list of notes in base directory
+    txtFiles = gatherNotes()
 
     // store contents of files in model and render template with it
     model.txtFiles = txtFiles
@@ -260,33 +233,7 @@
     fileViewer = document.querySelector('#fileEditor')
     lastModified = document.getElementById('lastModified')
     fileNameContainer = document.getElementById('fileNames')
-
-    // handle a refresh while a file is selected
-    if (currentFile) {
-      // if a file was being edited before a refresh it needs to start out selected
-      if (currentFile.edited) {
-        for (const file of fileList) {
-          if (file.innerHTML === currentFile.element.innerHTML) {
-            currentFile.setElement(file)
-            currentFile.element.classList.add('highlight')
-            currentFile.element.classList.add('edited')
-            updateLastModified()
-            fileViewer.value = editedFileCache
-            break
-          }
-        }
-      } else {
-        for (const file of fileList) {
-          if (file.innerHTML === currentFile.element.innerHTML) {
-            fileViewer.value = currentFile.content
-            currentFile.setElement(file)
-            currentFile.element.classList.add('highlight')
-            updateLastModified()
-            break
-          }
-        }
-      }
-    }
+    searchInput = document.getElementById('search')
 
     // create the split pane view
     Split(['#txtFileList', '#txtFileView'], {
@@ -312,12 +259,42 @@
         store.delete('lastFile')
       }
     }
+
+    // bind event listener to search input
+    searchInput.addEventListener('input', debounce(searchHandler, 200))
+
+    // watch for file changes in base directory
+    watcher = chokidar.watch(baseDir, {
+      ignored: /(^|[/\\])\../,
+      ignoreInitial: true
+    })
+
+    watcher
+      .on('add', (file) => {
+        if (path.extname(file) === '.txt') {
+          addNote(file)
+
+          // reload file list
+          reloadFileList(txtFiles)
+        }
+      })
+      .on('unlink', file => {
+        if (path.extname(file) === '.txt') {
+          removeNote(file)
+
+          // reload file list
+          reloadFileList(txtFiles)
+        }
+      })
+      .on('unlinkDir', file => {
+        if (file === baseDir) {
+          watcher.close()
+          startAppBaseForm()
+        }
+      })
   }
 
-  /**
-   * Universal event listeners
-   */
-
+  // handle click events
   window.addEventListener('click', event => {
     // file in the list
     if (event.target.className.includes('fileName')) {
@@ -326,16 +303,17 @@
       switch (event.target.id) {
         // initial directory picker button
         case 'dirPicker':
-          chooseDirHandler()
+          baseDirHandler()
           break
 
         // add file button
         case 'addFile':
+          clearSearch()
           addHandler()
           break
 
         // remove file button
-        case 'removeHandler':
+        case 'removeFile':
           removeHandler()
           break
 
@@ -346,11 +324,13 @@
 
         // refresh button
         case 'refreshButton':
+          clearSearch()
           refreshButtonHandler()
           break
 
         // change directory button
         case 'changeBaseDir':
+          clearSearch()
           baseDirHandler()
           break
       }
@@ -360,84 +340,78 @@
   // bind event listener for arrow file navigation
   window.addEventListener('keydown', keySelectionHandler)
 
-  // bind event listeners for editing in text area
+  /**
+   * Event handler for typing into the search field
+   * @param {object} event - Input event
+   */
+  async function searchHandler (event) {
+    let input = event.target.value
+
+    // clear searchFiles global
+    searchFiles = []
+
+    if (input) {
+      input = input.toLowerCase()
+
+      for (const txt of txtFiles) {
+        // search name and file content
+        if (txt.name.toLowerCase().includes(input) || txt.content.toLowerCase().includes(input)) {
+          searchFiles.push(txt)
+        }
+      }
+
+      // spin up a save confirmation if a file is being edited
+      if (currentFile && currentFile.edited) {
+        const result = await ipcRenderer.invoke('confirmNavigateAway', currentFile.name)
+
+        if (result.response === 1) {
+          saveFile()
+          clearSelection()
+          reloadFileList(searchFiles)
+        } else {
+          clearSelection()
+          reloadFileList(searchFiles)
+        }
+      } else {
+        reloadFileList(searchFiles)
+      }
+    } else {
+      reloadFileList(txtFiles)
+    }
+  }
+
+  // bind event listeners for editing textarea
   window.addEventListener('input', event => {
     if (event.target.id === 'fileEditor') {
       fileEditHandler(event)
     }
   })
 
-  // watch for file changes in base directory
-  const watcher = chokidar.watch(baseDir, {
-    ignored: /(^|[/\\])\../,
-    ignoreInitial: true
-  })
-
-  watcher
-    .on('add', file => {
-      if (fileViewer) {
-        if (path.extname(file) === '.txt') {
-          initView()
-        }
-      }
-    })
-    .on('unlink', file => {
-      if (fileViewer) {
-        if (path.extname(file) === '.txt') {
-          initView()
-        }
-      }
-    })
-    .on('unlinkDir', file => {
-      if (fileViewer) {
-        if (file === baseDir) {
-          watcher.close()
-          startAppBaseForm()
-        }
-      }
-    })
-
   /**
-   * Event handlers
+   * Event handler for add file button or context menu item
    */
-
-  // directory picker button
-  async function chooseDirHandler () {
-    const result = await ipcRenderer.invoke('directoryPicker')
-
-    if (result.filePaths[0]) {
-      const selectedBaseDir = result.filePaths[0]
-
-      store.set('baseDir', selectedBaseDir)
-      baseDir = selectedBaseDir
-
-      initView()
-    }
-  }
-
-  // add file button
   function addHandler () {
     // track if a file name input already exists and disable the button if so
     if (addingFile) {
       return
     }
 
+    // set app state to adding mode
     addingFile = true
 
-    const lineItem = document.createElement('li')
-    const newFileInput = document.createElement('input')
-
+    // prevent files from being selected while a new one is being generated
     lockSelection = true
 
+    // create a form input, add it to the top of the file list, and give it focus
+    const lineItem = document.createElement('li')
+    const newFileInput = document.createElement('input')
     newFileInput.setAttribute('type', 'text')
     newFileInput.classList.add('fileNameEdit')
-
     lineItem.appendChild(newFileInput)
-
     fileNameContainer.insertBefore(lineItem, fileNameContainer.firstChild)
-
     newFileInput.focus()
 
+    // bind event listeners to the file name input
     newFileInput.addEventListener('input', fileNameValidation)
     newFileInput.addEventListener('keyup', event => {
       const key = event.key
@@ -446,23 +420,37 @@
         event.target.setCustomValidity('Please enter a file name')
       }
 
+      // enter key indicates finished name
       if (key === 'Enter' && event.target.checkValidity()) {
         event.preventDefault()
 
+        // set the new file name based on user input
         const newFileValue = newFileInput.value
         const newFileName = newFileValue + '.txt'
+        const newFilePath = path.join(baseDir, newFileName)
+
+        // remove the input field and replace it with the file name
         newFileInput.remove()
         lineItem.classList.add('fileName')
         lineItem.innerHTML = newFileValue
 
-        fs.openSync(path.join(baseDir, newFileName), 'a')
+        // create the new file
+        fs.openSync(newFilePath, 'a')
 
+        // allow files to be selected again
         lockSelection = false
 
-        lineItem.click()
+        // add the note to the global list
+        addNote(newFilePath)
 
+        // select the new file and focus on the text editor
+        lineItem.click()
+        fileViewer.focus()
+
+        // remove adding file state
         addingFile = false
       } else if (key === 'Escape') {
+        // escape key indicates backing out of new file operation
         event.preventDefault()
 
         lockSelection = false
@@ -524,9 +512,23 @@
   }
 
   /**
-     * Event handler for typing in main text editor
-     * @param {object} event - Input event
-     */
+   * Remove highlighting from currently selected file and clear caches
+   */
+  function clearSelection () {
+    if (currentFile) {
+      currentFile.element.classList.remove('highlight')
+      currentFile.element.classList.remove('edited')
+    }
+
+    currentFile = null
+    lastModified.innerHTML = ''
+    fileViewer.value = ''
+  }
+
+  /**
+   * Event handler for typing in main text editor
+   * @param {object} event - Input event
+   */
   function fileEditHandler (event) {
     // if file was edited
     if (event.target.value !== currentFile.content) {
@@ -560,13 +562,10 @@
       const result = await ipcRenderer.invoke('removeHandler', selectedFileName)
 
       if (result.response === 1) {
+        const file = path.join(baseDir, selectedFileName)
+        removeNote(file)
         elementToDelete.remove()
-        if (elementToDelete === currentFile.element) {
-          fileViewer.value = ''
-          lastModified.innerHTML = ''
-          currentFile = null
-        }
-        fs.unlinkSync(path.join(baseDir, selectedFileName))
+        fs.unlinkSync(file)
       }
     }
   }
@@ -575,7 +574,7 @@
    * Event handler for clicking refresh button
    */
   function refreshButtonHandler () {
-    initView()
+    reloadFileList(txtFiles)
   }
 
   /**
@@ -589,7 +588,8 @@
 
       store.set('baseDir', selectedBaseDir)
       baseDir = selectedBaseDir
-      currentFile = null
+
+      watcher.close()
 
       initView()
     }
@@ -621,7 +621,7 @@
     fileRenameInput.value = element.innerHTML
 
     element.innerHTML = ''
-
+    element.classList.remove('highlight')
     element.appendChild(fileRenameInput)
 
     fileRenameInput.focus()
@@ -638,7 +638,7 @@
       const newFileName = event.target.value + '.txt'
 
       if (key === 'Enter' && event.target.checkValidity()) {
-        const nowTime = moment().unix()
+        const nowTime = dayjs().unix()
 
         // rename the file
         fs.renameSync(path.join(baseDir, oldFileName), path.join(baseDir, newFileName))
@@ -649,7 +649,7 @@
         lockSelection = false
 
         element.click()
-        currentFile.setModifyDate(moment().valueOf())
+        currentFile.setModifyDate(dayjs().valueOf())
         currentFile.element.remove()
         fileNameContainer.insertBefore(currentFile.element, fileNameContainer.firstChild)
         updateLastModified()
@@ -710,7 +710,7 @@
    * @param {object} event - Keydown event
    */
   function keySelectionHandler (event) {
-    if (currentFile && event.target.tagName !== 'TEXTAREA') {
+    if (currentFile && event.target.tagName !== 'TEXTAREA' && event.target.tagName !== 'INPUT') {
       const element = currentFile.element
       const next = element.nextElementSibling
       const prev = element.previousElementSibling
@@ -731,19 +731,189 @@
   }
 
   /**
-   * Helper functions
+   * Event handler for closing out the app
    */
+  async function confirmClose () {
+    if (currentFile) {
+      // exit without intervention when no files are edited and unsaved
+      if (!currentFile.edited) {
+        await ipcRenderer.invoke('exit')
+      }
+
+      // tell the main process to spin up a confirmation dialog
+      const result = await ipcRenderer.invoke('confirmClose', currentFile.name)
+
+      if (result.response === 0) { // yes
+        saveFile()
+        await ipcRenderer.invoke('exit')
+      } else if (result.response === 2) { // cancel
+        return false
+      } else {
+        await ipcRenderer.invoke('exit')
+      }
+    } else {
+      await ipcRenderer.invoke('exit')
+    }
+  }
+
+  /**
+   * Scan the notes directory and return a master list of notes
+   * @returns {array} - List of notes
+   */
+  function gatherNotes () {
+    const txtFiles = []
+
+    // read all txt files in chosen directory
+    klawSync(baseDir, { depthLimit: 0 }).forEach(file => {
+      if (file.path.includes('.txt')) {
+        const fileName = path.basename(file.path)
+
+        txtFiles.push({
+          fileName: fileName,
+          name: fileName.slice(0, -4), // file name with .txt chopped off
+          dateCode: file.stats.mtimeMs,
+          content: fs.readFileSync(file.path, 'utf8')
+        })
+      }
+    })
+
+    // sort files by modified date
+    txtFiles.sort(sortByDate)
+
+    return txtFiles
+  }
+
+  /**
+   * Add a new note to the master notes list
+   * @param {string} path - Path to new note file
+   */
+  function addNote (file) {
+    const fileName = path.basename(file)
+
+    // ensure this is a new note
+    if (!txtFiles.find(item => item.fileName === fileName)) {
+      const stats = fs.statSync(file)
+
+      // add file to master note list
+      txtFiles.push({
+        fileName: fileName,
+        name: fileName.slice(0, -4), // file name with .txt chopped off
+        dateCode: stats.mtimeMs,
+        content: fs.readFileSync(file, 'utf8')
+      })
+
+      // sort files by modified date
+      txtFiles.sort(sortByDate)
+    }
+  }
+
+  /**
+   * Remove a note from the master notes list
+   * @param {string} file - Path to note being removed
+   */
+  function removeNote (file) {
+    const fileName = path.basename(file)
+    const index = txtFiles.findIndex(item => item.fileName === fileName)
+
+    if (index) {
+      if (fileName === currentFile.name) {
+        currentFile = null
+        lastModified.innerHTML = ''
+        fileViewer.value = ''
+      }
+
+      txtFiles.splice(index, 1)
+    }
+  }
+
+  /**
+   * Clear search form and files cache
+   */
+  function clearSearch () {
+    searchFiles = []
+    searchInput.value = ''
+    reloadFileList(txtFiles)
+  }
+
+  /**
+   * Perform a fresh render of the file list
+   * @param {array} notes - List of notes to render
+   */
+  function reloadFileList (notes) {
+    const model = {}
+    let editedFileCache
+
+    if (currentFile && currentFile.edited) {
+      editedFileCache = fileViewer.value
+    }
+
+    // clear caches
+    fileNameContainer.innerHTML = ''
+    rightClickCache = null
+
+    // sort notes by last modified
+    notes.sort(sortByDate)
+
+    // store contents of files in model and render template with it
+    model.txtFiles = notes
+    const newTemplate = teddy.render(noteListTemplate, model)
+    fileNameContainer.innerHTML = newTemplate
+
+    // get fresh reference to list of files
+    fileList = document.querySelectorAll('#fileNames li')
+
+    // handle a refresh while a file is selected
+    if (currentFile) {
+      // if a file was being edited before a refresh it needs to start out selected
+      if (currentFile.edited) {
+        for (const file of fileList) {
+          if (file.innerHTML === currentFile.element.innerHTML) {
+            currentFile.setElement(file)
+            currentFile.element.classList.add('highlight')
+            currentFile.element.classList.add('edited')
+            updateLastModified()
+            fileViewer.value = editedFileCache
+            break
+          }
+        }
+      } else {
+        for (const file of fileList) {
+          if (file.innerHTML === currentFile.element.innerHTML) {
+            fileViewer.value = currentFile.content
+            currentFile.setElement(file)
+            currentFile.element.classList.add('highlight')
+            updateLastModified()
+            break
+          }
+        }
+      }
+    }
+  }
 
   /**
    * Save changes to file
    */
   function saveFile () {
+    // set in memory file content
     currentFile.setContent(fileViewer.value)
-    currentFile.setModifyDate(moment().valueOf())
+
+    // update last modified date
+    currentFile.setModifyDate(dayjs().valueOf())
+
+    // write new file data
     fs.writeFileSync(path.join(baseDir, currentFile.name), fileViewer.value)
+
+    // run sort by modified date on master notes array
+    txtFiles.sort(sortByDate)
+
+    // move file to top of the list
     currentFile.element.remove()
     fileNameContainer.insertBefore(currentFile.element, fileNameContainer.firstChild)
+
+    // update last modified time in ui
     updateLastModified()
+
+    // remove edited status
     currentFile.setEdited(false)
     currentFile.element.classList.remove('edited')
   }
@@ -752,7 +922,7 @@
    * Update last modified field
    */
   function updateLastModified () {
-    lastModified.innerHTML = moment(currentFile.modifyDate).format('MMMM D, YYYY, h:mm a')
+    lastModified.innerHTML = dayjs(currentFile.modifyDate).format('MMMM D, YYYY, h:mm a')
   }
 
   /**
@@ -781,7 +951,7 @@
    * Determine if element is inside the file list by coordinate
    * @param {number} x - X axis coordinate of document
    * @param {number} y - Y axis coordinate of document
-   * @returns {boolean} - If element is the file list
+   * @returns {boolean} - If element is the file list container
    */
   function elementIsFileList (x, y) {
     const elements = document.elementsFromPoint(x, y)
@@ -806,6 +976,20 @@
       return true
     } catch (e) {
       return false
+    }
+  }
+
+  /**
+   * Apply a delay to passed callback function
+   * @param {function} callback - Function to delay
+   * @param {number} delay - Number of ms to delay callback execution
+   */
+  function debounce (callback, delay) {
+    let timeout
+    return (...args) => {
+      const context = this
+      clearTimeout(timeout)
+      timeout = setTimeout(() => callback.apply(context, args), delay)
     }
   }
 

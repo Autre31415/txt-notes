@@ -1,6 +1,16 @@
 # txt-notes Changelog
 
-## Next Version
+## 0.2.0 (8/16/20)
+
+- Update electron to v9.2.0.
+- Add file search!
+- Major refactors under the hood to improve performance.
+- Fix bug where files far down the list would take longer to select.
+- Fix bug where adding lots of new files would slow down file selection.
+- Fix bug where new file would randomly lose focus.
+- Fix bug where pressing arrow keys while editing file name would take away focus.
+- Replace moment dependency with dayjs.
+- Various dependencies updated.
 
 ## 0.1.7 (6/20/20)
 
