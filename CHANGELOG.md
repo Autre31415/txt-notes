@@ -1,5 +1,9 @@
 # txt-notes Changelog
 
+## Next Version
+
+- Add clear button to search input.
+
 ## 0.2.0 (8/16/20)
 
 - Update electron to v9.2.0.
