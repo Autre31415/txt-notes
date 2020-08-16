@@ -1,6 +1,6 @@
 # txt-notes Changelog
 
-## Next Version
+## 0.2.1 (8/16/20)
 
 - Add clear button to search input.
 
