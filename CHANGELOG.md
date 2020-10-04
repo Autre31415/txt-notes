@@ -1,6 +1,6 @@
 # txt-notes Changelog
 
-## 0.2.1 (10/4/20)
+## 0.2.2 (10/4/20)
 
 - Update Electron to v10.1.3
 - File add/rename enhancements:
