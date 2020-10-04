@@ -1,5 +1,21 @@
 # txt-notes Changelog
 
+## 0.2.2 (10/4/20)
+
+- Update Electron to v10.1.3
+- File add/rename enhancements:
+  - Operation can be exited by clicking outside the field.
+  - Text is auto selected.
+  - Colors are modified to give the input more focus.
+- Fix bug where last viewed file would not be open at runtime.
+- Fix bug where last modified date was not being read from cache.
+- Fix bug where selecting a file with certain special characters in it would lock up selection.
+- Fix bug where initial directory picker would sometimes failed to function.
+- Fix file rename bug.
+- Fix file deletion bug.
+- Refactored file selection logic.
+- Various dependencies updated.
+
 ## 0.2.1 (8/16/20)
 
 - Add clear button to search input.

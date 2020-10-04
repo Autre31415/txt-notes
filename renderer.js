@@ -109,9 +109,9 @@
      */
     constructor (file) {
       this.element = file
-      this.name = file.innerHTML + '.txt'
+      this.name = file.textContent + '.txt'
       this.content = txtFiles.find(item => item.fileName === this.name).content
-      this.modifyDate = fs.statSync(path.join(baseDir, this.name)).mtimeMs
+      this.modifyDate = txtFiles.find(item => item.fileName === this.name).dateCode
       this.edited = false
 
       // save reference to newly selected file
@@ -154,14 +154,65 @@
   }
 
   // set baseDir to local directory in dev mode
-  try {
-    const isDev = require('electron-is-dev')
+  const isDev = process.argv.includes('ELECTRON_IS_DEV')
 
-    if (isDev) {
-      fs.ensureDirSync(('./tmp'))
-      baseDir = './tmp'
+  if (isDev) {
+    fs.ensureDirSync(('./tmp'))
+    baseDir = './tmp'
+  }
+
+  // handle click events
+  window.addEventListener('click', event => {
+    // file in the list
+    if (event.target.className.includes('fileName')) {
+      fileClickHandler(event)
+    } else {
+      switch (event.target.id) {
+        // initial directory picker button
+        case 'dirPicker':
+          baseDirHandler()
+          break
+
+        // add file button
+        case 'addFile':
+          clearSearch()
+          addHandler()
+          break
+
+        // remove file button
+        case 'removeFile':
+          removeHandler()
+          break
+
+        // save file button
+        case 'saveFile':
+          saveButtonHandler()
+          break
+
+        // refresh button
+        case 'refreshButton':
+          clearSearch()
+          refreshButtonHandler()
+          break
+
+        // change directory button
+        case 'changeBaseDir':
+          clearSearch()
+          baseDirHandler()
+          break
+      }
     }
-  } catch {}
+  })
+
+  // bind event listeners for editing textarea
+  window.addEventListener('input', event => {
+    if (event.target.id === 'fileEditor') {
+      fileEditHandler(event)
+    }
+  })
+
+  // bind event listener for arrow file navigation
+  window.addEventListener('keydown', keySelectionHandler)
 
   // entry point
   configCheck()
@@ -248,9 +299,10 @@
       let found
 
       for (const file of fileList) {
-        if (file.innerHTML === lastFileInnerText) {
+        if (file.textContent === lastFileInnerText) {
           file.click()
           found = true
+          break
         }
       }
 
@@ -266,12 +318,14 @@
     // watch for file changes in base directory
     watcher = chokidar.watch(baseDir, {
       ignored: /(^|[/\\])\../,
-      ignoreInitial: true
+      ignoreInitial: true,
+      depth: 0
     })
 
     watcher
       .on('add', (file) => {
-        if (path.extname(file) === '.txt') {
+        // only trigger for txt files not in the note list
+        if (path.extname(file) === '.txt' && !txtFiles.find(item => item.fileName === path.basename(file))) {
           addNote(file)
 
           // reload file list
@@ -279,7 +333,8 @@
         }
       })
       .on('unlink', file => {
-        if (path.extname(file) === '.txt') {
+        // only trigger for txt files in the note list
+        if (path.extname(file) === '.txt' && txtFiles.find(item => item.fileName === path.basename(file))) {
           removeNote(file)
 
           // reload file list
@@ -293,52 +348,6 @@
         }
       })
   }
-
-  // handle click events
-  window.addEventListener('click', event => {
-    // file in the list
-    if (event.target.className.includes('fileName')) {
-      fileClickHandler(event)
-    } else {
-      switch (event.target.id) {
-        // initial directory picker button
-        case 'dirPicker':
-          baseDirHandler()
-          break
-
-        // add file button
-        case 'addFile':
-          clearSearch()
-          addHandler()
-          break
-
-        // remove file button
-        case 'removeFile':
-          removeHandler()
-          break
-
-        // save file button
-        case 'saveFile':
-          saveButtonHandler()
-          break
-
-        // refresh button
-        case 'refreshButton':
-          clearSearch()
-          refreshButtonHandler()
-          break
-
-        // change directory button
-        case 'changeBaseDir':
-          clearSearch()
-          baseDirHandler()
-          break
-      }
-    }
-  })
-
-  // bind event listener for arrow file navigation
-  window.addEventListener('keydown', keySelectionHandler)
 
   /**
    * Event handler for typing into the search field
@@ -380,13 +389,6 @@
     }
   }
 
-  // bind event listeners for editing textarea
-  window.addEventListener('input', event => {
-    if (event.target.id === 'fileEditor') {
-      fileEditHandler(event)
-    }
-  })
-
   /**
    * Event handler for add file button or context menu item
    */
@@ -411,6 +413,12 @@
     fileNameContainer.insertBefore(lineItem, fileNameContainer.firstChild)
     newFileInput.focus()
 
+    // fade out the text of surrounding elements
+    fileNameContainer.classList.add('renaming')
+
+    // bind a click event to the entire file pane
+    fileNameContainer.parentNode.addEventListener('click', clickAwayAdd)
+
     // bind event listeners to the file name input
     newFileInput.addEventListener('input', fileNameValidation)
     newFileInput.addEventListener('keyup', event => {
@@ -432,7 +440,7 @@
         // remove the input field and replace it with the file name
         newFileInput.remove()
         lineItem.classList.add('fileName')
-        lineItem.innerHTML = newFileValue
+        lineItem.textContent = newFileValue
 
         // create the new file
         fs.openSync(newFilePath, 'a')
@@ -453,11 +461,30 @@
         // escape key indicates backing out of new file operation
         event.preventDefault()
 
-        lockSelection = false
-        lineItem.remove()
-        addingFile = false
+        escapeAdd()
       }
     })
+
+    /**
+     * Event handler for clicking out of add operation
+     * @param {object} event - Click event
+     */
+    function clickAwayAdd (event) {
+      // exit add mode when clicking out of the input
+      if (event.target !== newFileInput) {
+        escapeAdd()
+      }
+    }
+
+    /**
+     * Cancel file creation in progress
+     */
+    function escapeAdd () {
+      lockSelection = false
+      lineItem.remove()
+      fileNameContainer.classList.remove('renaming')
+      addingFile = false
+    }
   }
 
   /**
@@ -465,11 +492,8 @@
    * @param {object} event - Click event
    */
   async function fileClickHandler (event) {
-    let element
-
-    if (!lockSelection && (!currentFile || `${currentFile.name}.txt` !== `${event.target.innerHTML}.txt`)) {
-      element = event.target
-
+    const element = event.target
+    if (!lockSelection && (!currentFile || currentFile.name !== `${element.textContent}.txt`)) {
       // bring up save dialog when navigating away from edited file
       if (currentFile && currentFile.edited) {
         // spin up confirmation dialog
@@ -558,7 +582,7 @@
   async function removeHandler () {
     if (rightClickCache || currentFile) {
       const elementToDelete = rightClickCache || currentFile.element
-      const selectedFileName = elementToDelete.innerHTML + '.txt'
+      const selectedFileName = elementToDelete.textContent + '.txt'
       const result = await ipcRenderer.invoke('removeHandler', selectedFileName)
 
       if (result.response === 1) {
@@ -589,8 +613,6 @@
       store.set('baseDir', selectedBaseDir)
       baseDir = selectedBaseDir
 
-      watcher.close()
-
       initView()
     }
   }
@@ -600,7 +622,7 @@
    */
   function copyFileNameHandler () {
     if (rightClickCache) {
-      clipboard.writeText(rightClickCache.innerHTML)
+      clipboard.writeText(rightClickCache.textContent)
 
       rightClickCache = null
     }
@@ -610,24 +632,33 @@
    * Event handler for clicking rename file context menu item
    */
   function renameFileHandler () {
+    // get the element from the cache
     const element = rightClickCache
-    const oldFileName = element.innerHTML + '.txt'
+    const oldFileName = element.textContent + '.txt'
+
+    // create an input populated with the current file name and give it focus
     const fileRenameInput = document.createElement('input')
-
-    lockSelection = true
-
     fileRenameInput.setAttribute('type', 'text')
     fileRenameInput.classList.add('fileNameEdit')
-    fileRenameInput.value = element.innerHTML
-
+    fileRenameInput.value = element.textContent
     element.innerHTML = ''
     element.classList.remove('highlight')
     element.appendChild(fileRenameInput)
-
     fileRenameInput.focus()
+    fileRenameInput.select()
 
+    // lock ability to select other files while input is displayed
+    lockSelection = true
+
+    // attach some event listeners to the rename input
     fileRenameInput.addEventListener('keydown', renameConfirmHandler)
     fileRenameInput.addEventListener('input', renameValidation)
+
+    // fade out the text of surrounding elements
+    fileNameContainer.classList.add('renaming')
+
+    // bind a click event to the entire file pane
+    fileNameContainer.parentNode.addEventListener('click', clickAwayRename)
 
     /**
      * Event handler for confirming or canceling file rename
@@ -638,25 +669,46 @@
       const newFileName = event.target.value + '.txt'
 
       if (key === 'Enter' && event.target.checkValidity()) {
-        const nowTime = dayjs().unix()
+        const nowTime = dayjs().valueOf()
 
-        // rename the file
+        // update note in the list
+        renameNote(oldFileName, newFileName, nowTime)
+
+        // rename the file itself
         fs.renameSync(path.join(baseDir, oldFileName), path.join(baseDir, newFileName))
-        fs.utimesSync(path.join(baseDir, newFileName), nowTime, nowTime)
-        event.target.remove()
-        element.innerHTML = newFileName.slice(0, -4)
 
+        // update file modified time
+        fs.utimesSync(path.join(baseDir, newFileName), nowTime, nowTime)
+
+        // remove the input element
+        event.target.remove()
+
+        // set right clicked element to new file name
+        element.textContent = newFileName.slice(0, -4)
+
+        // unlock file selection
         lockSelection = false
 
+        // select the updated note
         element.click()
-        currentFile.setModifyDate(dayjs().valueOf())
-        currentFile.element.remove()
+
+        // bring note element back
         fileNameContainer.insertBefore(currentFile.element, fileNameContainer.firstChild)
+
         updateLastModified()
       } else if (key === 'Escape') {
-        event.target.remove()
-        element.innerHTML = oldFileName.slice(0, -4)
-        lockSelection = false
+        escapeEdit()
+      }
+    }
+
+    /**
+     * Event handler for clicking out of rename operation
+     * @param {object} event - Click event
+     */
+    function clickAwayRename (event) {
+      // exit edit mode when clicking out of the input
+      if (event.target !== fileRenameInput) {
+        escapeEdit()
       }
     }
 
@@ -666,6 +718,17 @@
      */
     function renameValidation (event) {
       fileNameValidation(event, oldFileName.slice(0, -4))
+    }
+
+    /**
+     * Cancel file rename in progress
+     */
+    function escapeEdit () {
+      fileRenameInput.remove()
+      element.textContent = oldFileName.slice(0, -4)
+      fileNameContainer.classList.remove('renaming')
+      fileNameContainer.parentNode.removeEventListener('click', clickAwayRename)
+      lockSelection = false
     }
   }
 
@@ -815,8 +878,8 @@
     const fileName = path.basename(file)
     const index = txtFiles.findIndex(item => item.fileName === fileName)
 
-    if (index) {
-      if (fileName === currentFile.name) {
+    if (index !== -1) {
+      if (currentFile && fileName === currentFile.name) {
         currentFile = null
         lastModified.innerHTML = ''
         fileViewer.value = ''
@@ -824,6 +887,27 @@
 
       txtFiles.splice(index, 1)
     }
+  }
+
+  /**
+   * Rename and update modified time of a note in the master list
+   * @param {string} oldFile - Name of the file being changed
+   * @param {string} newFile - New file name
+   * @param {string} time - Time to set modified time to
+   */
+  function renameNote (oldFile, newFile, time) {
+    // look for the old note
+    const index = txtFiles.findIndex(item => item.fileName === oldFile)
+
+    // update note with new name and modified time
+    if (index !== -1) {
+      txtFiles[index].fileName = newFile
+      txtFiles[index].name = newFile.slice(0, -4)
+      txtFiles[index].dateCode = time
+    }
+
+    // sort files by modified date
+    txtFiles.sort(sortByDate)
   }
 
   /**
@@ -867,7 +951,7 @@
       // if a file was being edited before a refresh it needs to start out selected
       if (currentFile.edited) {
         for (const file of fileList) {
-          if (file.innerHTML === currentFile.element.innerHTML) {
+          if (file.textContent === currentFile.element.textContent) {
             currentFile.setElement(file)
             currentFile.element.classList.add('highlight')
             currentFile.element.classList.add('edited')
@@ -878,7 +962,7 @@
         }
       } else {
         for (const file of fileList) {
-          if (file.innerHTML === currentFile.element.innerHTML) {
+          if (file.textContent === currentFile.element.textContent) {
             fileViewer.value = currentFile.content
             currentFile.setElement(file)
             currentFile.element.classList.add('highlight')
