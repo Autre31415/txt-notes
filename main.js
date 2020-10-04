@@ -1,6 +1,7 @@
 // Modules to control application life and create native browser window
 const { app, BrowserWindow, dialog, ipcMain } = require('electron')
 const windowStateKeeper = require('electron-window-state')
+const isDev = !app.isPackaged
 
 // auto reload window in dev mode
 try {
@@ -72,7 +73,13 @@ function createWindow () {
     width: mainWindowState.width,
     height: mainWindowState.height,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+
+      // this is necessary until electron-context-menu gets refactored
+      enableRemoteModule: true,
+
+      // this replaces the need for electron-is-dev
+      additionalArguments: [isDev ? 'ELECTRON_IS_DEV' : 'ELECTRON_IS_PACKAGED']
     },
     titleBarStyle: 'hiddenInset'
   })
