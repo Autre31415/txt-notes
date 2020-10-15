@@ -1,5 +1,10 @@
 # txt-notes Changelog
 
+## 0.2.3 (10/15/20)
+
+- Fix but where newly created file would not show up on the list.
+- Various dependencies updated.
+
 ## 0.2.2 (10/4/20)
 
 - Update Electron to v10.1.3

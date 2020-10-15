@@ -296,20 +296,10 @@
     // select last opened file before close if one exists
     if (store.get('lastFile')) {
       const lastFileInnerText = store.get('lastFile').slice(0, -4)
-      let found
 
-      for (const file of fileList) {
-        if (file.textContent === lastFileInnerText) {
-          file.click()
-          found = true
-          break
-        }
-      }
+      selectFile(lastFileInnerText)
 
-      // if last selected file doesn't exist, remove record of it
-      if (!found) {
-        store.delete('lastFile')
-      }
+      store.delete('lastFile')
     }
 
     // bind event listener to search input
@@ -440,7 +430,7 @@
         // remove the input field and replace it with the file name
         newFileInput.remove()
         lineItem.classList.add('fileName')
-        lineItem.textContent = newFileValue
+        lineItem.innerHTML = newFileValue
 
         // create the new file
         fs.openSync(newFilePath, 'a')
@@ -451,12 +441,15 @@
         // add the note to the global list
         addNote(newFilePath)
 
-        // select the new file and focus on the text editor
-        lineItem.click()
-        fileViewer.focus()
+        // reload the list
+        reloadFileList(txtFiles)
 
         // remove adding file state
         addingFile = false
+
+        // select the new file and focus on the text editor
+        selectFile(newFileValue)
+        fileViewer.focus()
       } else if (key === 'Escape') {
         // escape key indicates backing out of new file operation
         event.preventDefault()
@@ -532,6 +525,19 @@
 
       // populate text editor with file content
       fileViewer.value = currentFile.content
+    }
+  }
+
+  /**
+   * Select a file in the list by name
+   * @param {string} name - File name to select
+   */
+  function selectFile (name) {
+    for (const file of fileList) {
+      if (file.textContent === name) {
+        file.click()
+        break
+      }
     }
   }
 
