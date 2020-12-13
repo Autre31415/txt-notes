@@ -1,5 +1,13 @@
 # txt-notes Changelog
 
+## 0.2.4 (12/13/20)
+
+- Update Electron to v11.1.0.
+- Fix bug where UI wouldn't update properly when renaming a file.
+- Fix bug where last selected file would get forgotten between app loads.
+- Fix bug where last modified time would get set to some far flung future time.
+- Various dependencies updated.
+
 ## 0.2.3 (10/15/20)
 
 - Fix but where newly created file would not show up on the list.

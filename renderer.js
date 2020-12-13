@@ -298,8 +298,6 @@
       const lastFileInnerText = store.get('lastFile').slice(0, -4)
 
       selectFile(lastFileInnerText)
-
-      store.delete('lastFile')
     }
 
     // bind event listener to search input
@@ -686,20 +684,25 @@
         // update file modified time
         fs.utimesSync(path.join(baseDir, newFileName), nowTime, nowTime)
 
-        // remove the input element
-        event.target.remove()
-
-        // set right clicked element to new file name
-        element.textContent = newFileName.slice(0, -4)
+        // remove the old file element
+        element.remove()
 
         // unlock file selection
         lockSelection = false
 
-        // select the updated note
-        element.click()
+        // clear current file cache
+        currentFile = null
 
-        // bring note element back
-        fileNameContainer.insertBefore(currentFile.element, fileNameContainer.firstChild)
+        // create a new element for this renamed file
+        const renamedNote = document.createElement('li')
+        renamedNote.className = 'fileName'
+        renamedNote.textContent = newFileName.slice(0, -4)
+
+        // insert the renamed note
+        fileNameContainer.insertBefore(renamedNote, fileNameContainer.firstChild)
+
+        // select the updated note
+        renamedNote.click()
 
         updateLastModified()
       } else if (key === 'Escape') {
