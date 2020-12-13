@@ -1,6 +1,6 @@
 {
   "name": "txt-notes",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Manage txt files like the notes app",
   "main": "main.js",
   "author": "Troy Coutu",
