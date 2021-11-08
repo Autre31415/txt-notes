@@ -9,6 +9,7 @@
 - Size of file list pane is now remembered and restored when loading the app.
 - Fix bug where file list pane would get larger or smaller relative to window size.
 - Fix bug where renaming a file would set modified date to a far flung future time.
+- All dependencies updated.
 
 ## 0.2.4 (12/13/20)
 
