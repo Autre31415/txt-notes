@@ -1,6 +1,6 @@
 # txt-notes Changelog
 
-## 0.3.0 (11/7/20)
+## 0.3.0 (11/8/20)
 
 - Update Electron to v15.3.0.
 - [Disable browser node integration and enable context isolation](https://www.electronjs.org/docs/latest/tutorial/context-isolation).
