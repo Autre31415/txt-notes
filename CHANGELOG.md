@@ -1,5 +1,14 @@
 # txt-notes Changelog
 
+## 0.3.0 (11/7/20)
+
+- Update Electron to v15.3.0.
+- [Disable browser node integration and enable context isolation](https://www.electronjs.org/docs/latest/tutorial/context-isolation).
+- [Enable browser process sandboxing](https://www.electronjs.org/docs/latest/tutorial/sandbox).
+- Size of file list pane is now remembered and restored when loading the app.
+- Fix bug where file list pane would get larger or smaller relative to window size.
+- Fix bug where renaming a file would set modified date to a far flung future time.
+
 ## 0.2.4 (12/13/20)
 
 - Update Electron to v11.1.0.

@@ -10,12 +10,15 @@
     <input type='search' id='search' placeholder='Search'>
   </nav>
 </header>
-<section id='txtFileList' class='split split-horizontal'>
-  <ul id='fileNames'>
-    <include src='noteList'></include>
-  </ul>
-</section>
-<section id='txtFileView' class='split split-horizontal'>
-  <p id='lastModified'></p>
-  <textarea id='fileEditor'></textarea>
+<section id='grid'>
+  <section id='txtFileList' class='split split-horizontal'>
+    <ul id='fileNames'>
+      <include src='noteList'></include>
+    </ul>
+  </section>
+  <div class='gutter'></div>
+  <section id='txtFileView' class='split split-horizontal'>
+    <p id='lastModified'></p>
+    <textarea id='fileEditor'></textarea>
+  </section>
 </section>

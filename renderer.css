@@ -115,16 +115,12 @@ button:active {
 
 .gutter {
   background-color: #1e1e1e;
-}
-
-.gutter.gutter-horizontal {
   cursor: col-resize;
 }
 
-.split.split-horizontal,
-.gutter.gutter-horizontal {
+#grid {
   height: calc(100% - 35px);
-  float: left;
+  display: grid;
 }
 
 #txtFileList {
