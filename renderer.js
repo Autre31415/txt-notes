@@ -1,29 +1,13 @@
-(() => {
-  const Split = require('split.js')
-  const chokidar = require('chokidar')
-  const dayjs = require('dayjs')
-  const klawSync = require('klaw-sync')
-  const path = require('path')
-  const { clipboard, ipcRenderer } = require('electron')
-  const fs = require('fs-extra')
-  const contextMenu = require('electron-context-menu')
-  const teddy = require('teddy')
+/* global dayjs */
+
+import Split from './node_modules/split-grid/dist/split-grid.mjs'
+
+(async () => {
+  const electron = window.electron
   const main = document.getElementsByTagName('main')[0]
-  const Store = require('electron-store')
-  const store = new Store()
-  let baseDir = store.get('baseDir')
 
-  // directory picker template
-  const dirPickerTemplate = fs.readFileSync(path.join(__dirname, 'templates/firstLoad.html'), 'utf8')
-
-  // main note viewer template
-  const mainTemplate = fs.readFileSync(path.join(__dirname, 'templates/noteViewer.html'), 'utf8')
-
-  // note list partial template
-  const noteListTemplate = fs.readFileSync(path.join(__dirname, 'templates/noteList.html'), 'utf8')
-
-  // pre-compile noteList template
-  teddy.setTemplate('noteList.html', teddy.compile(noteListTemplate))
+  // the root directory of notes
+  let baseDir
 
   // file currently being right clicked
   let rightClickCache
@@ -58,44 +42,51 @@
   // array of txt files in watched folder
   let txtFiles = []
 
-  // chokidar directory scanner instance
-  let watcher
+  // pull the baseDir from the store
+  baseDir = await electron.storeGet('baseDir')
 
-  // hook up the context menu
-  contextMenu({
-    prepend: (defaultActions, params, browserWindow) => [
-      {
-        label: 'Copy File Name',
-        visible: elementIsFile(params.x, params.y),
-        click: copyFileNameHandler
-      },
-      {
-        label: 'New File',
-        visible: elementIsFileList(params.x, params.y),
-        click: addHandler
-      },
-      {
-        label: 'Rename File',
-        visible: elementIsFile(params.x, params.y),
-        click: renameFileHandler
-      },
-      {
-        label: 'Delete File',
-        visible: elementIsFile(params.x, params.y),
-        click: removeHandler
-      }
-    ]
-  })
+  // listen to events fired by the main process
+  electron.listen(async (event, message, fileName) => {
+    switch (message) {
+      case 'confirmClose':
+        await confirmClose()
+        break
+      case 'save':
+        // only init save when the file was edited
+        if (currentFile.edited) {
+          await saveFile()
+        }
+        break
+      case 'copyFileName':
+        await copyFileNameHandler()
+        break
+      case 'newFile':
+        addHandler()
+        break
+      case 'renameFile':
+        renameFileHandler()
+        break
+      case 'deleteFile':
+        await removeHandler()
+        break
+      case 'createFileEvent':
+        // only trigger for txt files not in the note list
+        if (!txtFiles.find(item => item.fileName === fileName)) {
+          await addNote(fileName)
 
-  // listen for main process close trigger
-  ipcRenderer.on('ping', (event, message) => {
-    if (message === 'confirmClose') {
-      confirmClose()
-    } else if (message === 'save') {
-      // only init save when the file was edited
-      if (currentFile.edited) {
-        saveFile()
-      }
+          // reload file list
+          await reloadFileList(txtFiles)
+        }
+        break
+      case 'deleteFileEvent':
+        // only trigger for txt files in the note list
+        if (txtFiles.find(item => item.fileName === fileName)) {
+          removeNote(fileName)
+
+          // reload file list
+          await reloadFileList(txtFiles)
+        }
+        break
     }
   })
 
@@ -115,7 +106,7 @@
       this.edited = false
 
       // save reference to newly selected file
-      store.set('lastFile', this.name)
+      electron.storeSet('lastFile', this.name)
     }
 
     /**
@@ -153,54 +144,52 @@
     }
   }
 
-  // set baseDir to local directory in dev mode
-  const isDev = process.argv.includes('ELECTRON_IS_DEV')
-
-  if (isDev) {
-    fs.ensureDirSync(('./tmp'))
-    baseDir = './tmp'
-  }
-
   // handle click events
-  window.addEventListener('click', event => {
+  window.addEventListener('click', async event => {
     // file in the list
     if (event.target.className.includes('fileName')) {
-      fileClickHandler(event)
+      await fileClickHandler(event)
     } else {
       switch (event.target.id) {
         // initial directory picker button
         case 'dirPicker':
-          baseDirHandler()
+          await baseDirHandler()
           break
 
         // add file button
         case 'addFile':
-          clearSearch()
+          await clearSearch()
           addHandler()
           break
 
         // remove file button
         case 'removeFile':
-          removeHandler()
+          await removeHandler()
           break
 
         // save file button
         case 'saveFile':
-          saveButtonHandler()
+          await saveButtonHandler()
           break
 
         // refresh button
         case 'refreshButton':
-          clearSearch()
-          refreshButtonHandler()
+          await clearSearch()
+          await refreshButtonHandler()
           break
 
         // change directory button
         case 'changeBaseDir':
-          clearSearch()
-          baseDirHandler()
+          await clearSearch()
+          await baseDirHandler()
           break
       }
+    }
+  })
+
+  window.addEventListener('mousedown', async event => {
+    if (event.button === 2) {
+      await electron.elementIsFile(elementIsFile(event.target), elementIsFileList(event.target))
     }
   })
 
@@ -215,24 +204,24 @@
   window.addEventListener('keydown', keySelectionHandler)
 
   // entry point
-  configCheck()
+  await configCheck()
 
   /**
    * Check if a base directory has been selected before starting the app
    */
-  function configCheck () {
+  async function configCheck () {
     // first check if there's a configured baseDir
     if (!baseDir) {
-      startAppBaseForm()
+      await startAppBaseForm()
     } else {
-      initView()
+      await initView()
     }
   }
 
   /**
    * Directory picker form view
    */
-  function startAppBaseForm () {
+  async function startAppBaseForm () {
     // clear caches
     main.innerHTML = ''
     txtFiles = []
@@ -244,14 +233,14 @@
     fileViewer = null
     lastModified = null
 
-    const compiledTemplate = teddy.render(dirPickerTemplate)
+    const compiledTemplate = await electron.renderTemplate('dirPickerTemplate')
     main.innerHTML = compiledTemplate
   }
 
   /**
    * Main application view
    */
-  function initView () {
+  async function initView () {
     const model = {}
 
     // clear caches
@@ -260,42 +249,50 @@
     rightClickCache = null
 
     // kick back to directory picker form if base directory doesn't exist
-    if (!fileExists(baseDir)) {
-      startAppBaseForm()
+    if (!await electron.fileExists(baseDir)) {
+      await startAppBaseForm()
       return
     }
 
     // build list of notes in base directory
-    txtFiles = gatherNotes()
+    txtFiles = await gatherNotes()
 
     // store contents of files in model and render template with it
     model.txtFiles = txtFiles
-    const newTemplate = teddy.render(mainTemplate, model)
+    const newTemplate = await electron.renderTemplate('mainTemplate', model)
     main.innerHTML = newTemplate
 
     // style main navigation based on platform
     const mainNav = document.querySelector('nav')
-    if (process.platform === 'darwin') {
+    if (await electron.platform() === 'darwin') {
       mainNav.classList.add('darwin-nav')
     }
 
     // grab a reference to file list and text area
+    const grid = document.querySelector('#grid')
     fileList = document.querySelectorAll('#fileNames li')
     fileViewer = document.querySelector('#fileEditor')
     lastModified = document.getElementById('lastModified')
     fileNameContainer = document.getElementById('fileNames')
     searchInput = document.getElementById('search')
 
-    // create the split pane view
-    Split(['#txtFileList', '#txtFileView'], {
-      sizes: [15, 85],
-      gutterSize: 2,
-      snapOffset: 0
+    grid.style['grid-template-columns'] = await electron.storeGet('columnSize') || '200px 2px 1fr'
+
+    Split({
+      columnGutters: [{
+        track: 1,
+        element: document.querySelector('.gutter')
+      }],
+      onDragEnd: async () => {
+        electron.storeSet('columnSize', grid.style['grid-template-columns'])
+      }
     })
 
+    const lastFile = await electron.storeGet('lastFile')
+
     // select last opened file before close if one exists
-    if (store.get('lastFile')) {
-      const lastFileInnerText = store.get('lastFile').slice(0, -4)
+    if (lastFile) {
+      const lastFileInnerText = lastFile.slice(0, -4)
 
       selectFile(lastFileInnerText)
     }
@@ -303,38 +300,8 @@
     // bind event listener to search input
     searchInput.addEventListener('input', debounce(searchHandler, 200))
 
-    // watch for file changes in base directory
-    watcher = chokidar.watch(baseDir, {
-      ignored: /(^|[/\\])\../,
-      ignoreInitial: true,
-      depth: 0
-    })
-
-    watcher
-      .on('add', (file) => {
-        // only trigger for txt files not in the note list
-        if (path.extname(file) === '.txt' && !txtFiles.find(item => item.fileName === path.basename(file))) {
-          addNote(file)
-
-          // reload file list
-          reloadFileList(txtFiles)
-        }
-      })
-      .on('unlink', file => {
-        // only trigger for txt files in the note list
-        if (path.extname(file) === '.txt' && txtFiles.find(item => item.fileName === path.basename(file))) {
-          removeNote(file)
-
-          // reload file list
-          reloadFileList(txtFiles)
-        }
-      })
-      .on('unlinkDir', file => {
-        if (file === baseDir) {
-          watcher.close()
-          startAppBaseForm()
-        }
-      })
+    // initialize the file watcher event system
+    await electron.initWatcher(baseDir)
   }
 
   /**
@@ -359,21 +326,21 @@
 
       // spin up a save confirmation if a file is being edited
       if (currentFile && currentFile.edited) {
-        const result = await ipcRenderer.invoke('confirmNavigateAway', currentFile.name)
+        const result = await electron.confirmNavigateAway(currentFile.name)
 
         if (result.response === 1) {
-          saveFile()
+          await saveFile()
           clearSelection()
-          reloadFileList(searchFiles)
+          await reloadFileList(searchFiles)
         } else {
           clearSelection()
-          reloadFileList(searchFiles)
+          await reloadFileList(searchFiles)
         }
       } else {
-        reloadFileList(searchFiles)
+        await reloadFileList(searchFiles)
       }
     } else {
-      reloadFileList(txtFiles)
+      await reloadFileList(txtFiles)
     }
   }
 
@@ -398,7 +365,7 @@
     newFileInput.setAttribute('type', 'text')
     newFileInput.classList.add('fileNameEdit')
     lineItem.appendChild(newFileInput)
-    fileNameContainer.insertBefore(lineItem, fileNameContainer.firstChild)
+    fileNameContainer.prepend(lineItem)
     newFileInput.focus()
 
     // fade out the text of surrounding elements
@@ -409,7 +376,7 @@
 
     // bind event listeners to the file name input
     newFileInput.addEventListener('input', fileNameValidation)
-    newFileInput.addEventListener('keyup', event => {
+    newFileInput.addEventListener('keyup', async event => {
       const key = event.key
 
       if (event.target.value.trim() === '') {
@@ -423,7 +390,6 @@
         // set the new file name based on user input
         const newFileValue = newFileInput.value
         const newFileName = newFileValue + '.txt'
-        const newFilePath = path.join(baseDir, newFileName)
 
         // remove the input field and replace it with the file name
         newFileInput.remove()
@@ -431,16 +397,16 @@
         lineItem.innerHTML = newFileValue
 
         // create the new file
-        fs.openSync(newFilePath, 'a')
+        await electron.addNote(baseDir, newFileName)
 
         // allow files to be selected again
         lockSelection = false
 
         // add the note to the global list
-        addNote(newFilePath)
+        await addNote(newFileName)
 
         // reload the list
-        reloadFileList(txtFiles)
+        await reloadFileList(txtFiles)
 
         // remove adding file state
         addingFile = false
@@ -488,10 +454,10 @@
       // bring up save dialog when navigating away from edited file
       if (currentFile && currentFile.edited) {
         // spin up confirmation dialog
-        const result = await ipcRenderer.invoke('confirmNavigateAway', currentFile.name)
+        const result = await electron.confirmNavigateAway(currentFile.name)
 
         if (result.response === 1) {
-          saveFile()
+          await saveFile()
           fileSelection()
         } else {
           fileSelection()
@@ -574,9 +540,9 @@
   /**
    * Event handler for clicking save file button
    */
-  function saveButtonHandler () {
+  async function saveButtonHandler () {
     if (currentFile && currentFile.edited) {
-      saveFile()
+      await saveFile()
     }
   }
 
@@ -587,13 +553,12 @@
     if (rightClickCache || currentFile) {
       const elementToDelete = rightClickCache || currentFile.element
       const selectedFileName = elementToDelete.textContent + '.txt'
-      const result = await ipcRenderer.invoke('removeHandler', selectedFileName)
+      const result = await electron.removeHandler(baseDir, selectedFileName)
 
-      if (result.response === 1) {
-        const file = path.join(baseDir, selectedFileName)
-        removeNote(file)
+      // invoke returns true if deleted
+      if (result) {
+        removeNote(selectedFileName)
         elementToDelete.remove()
-        fs.unlinkSync(file)
       }
     }
   }
@@ -601,32 +566,32 @@
   /**
    * Event handler for clicking refresh button
    */
-  function refreshButtonHandler () {
-    reloadFileList(txtFiles)
+  async function refreshButtonHandler () {
+    await reloadFileList(txtFiles)
   }
 
   /**
    * Event handler for clicking change directory button
    */
   async function baseDirHandler () {
-    const result = await ipcRenderer.invoke('directoryPicker')
+    const result = await electron.directoryPicker()
 
     if (result.filePaths[0]) {
       const selectedBaseDir = result.filePaths[0]
 
-      store.set('baseDir', selectedBaseDir)
+      electron.storeSet('baseDir', selectedBaseDir)
       baseDir = selectedBaseDir
 
-      initView()
+      await initView()
     }
   }
 
   /**
    * Event handler for clicking copy file name context menu item
    */
-  function copyFileNameHandler () {
+  async function copyFileNameHandler () {
     if (rightClickCache) {
-      clipboard.writeText(rightClickCache.textContent)
+      await electron.writeClipboard(rightClickCache.textContent)
 
       rightClickCache = null
     }
@@ -668,7 +633,7 @@
      * Event handler for confirming or canceling file rename
      * @param {object} event - Keydown event
      */
-    function renameConfirmHandler (event) {
+    async function renameConfirmHandler (event) {
       const key = event.key
       const newFileName = event.target.value + '.txt'
 
@@ -678,11 +643,7 @@
         // update note in the list
         renameNote(oldFileName, newFileName, nowTime)
 
-        // rename the file itself
-        fs.renameSync(path.join(baseDir, oldFileName), path.join(baseDir, newFileName))
-
-        // update file modified time
-        fs.utimesSync(path.join(baseDir, newFileName), nowTime, nowTime)
+        await electron.renameHandler(baseDir, oldFileName, newFileName, nowTime)
 
         // remove the old file element
         element.remove()
@@ -699,7 +660,8 @@
         renamedNote.textContent = newFileName.slice(0, -4)
 
         // insert the renamed note
-        fileNameContainer.insertBefore(renamedNote, fileNameContainer.firstChild)
+        fileNameContainer.prepend(renamedNote)
+        // fileNameContainer.insertBefore(renamedNote, fileNameContainer.firstChild)
 
         // select the updated note
         renamedNote.click()
@@ -749,7 +711,6 @@
   function fileNameValidation (event, oldFileName) {
     const input = event.target
     const possibleFileName = input.value + '.txt'
-    const possiblePath = path.join(baseDir, possibleFileName)
     let valid = true
 
     // ensure file name isn't blank
@@ -760,7 +721,7 @@
 
     // ensure file name doesn't match another file
     if (input.value !== oldFileName) {
-      if (fileExists(possiblePath)) {
+      if (txtFiles.find(item => item.fileName === possibleFileName)) {
         input.setCustomValidity('This file matches another file')
         valid = false
       }
@@ -809,22 +770,22 @@
     if (currentFile) {
       // exit without intervention when no files are edited and unsaved
       if (!currentFile.edited) {
-        await ipcRenderer.invoke('exit')
+        await electron.exitApp()
       }
 
       // tell the main process to spin up a confirmation dialog
-      const result = await ipcRenderer.invoke('confirmClose', currentFile.name)
+      const result = await electron.confirmClose(currentFile.name)
 
       if (result.response === 0) { // yes
-        saveFile()
-        await ipcRenderer.invoke('exit')
+        await saveFile()
+        await electron.exitApp()
       } else if (result.response === 2) { // cancel
         return false
       } else {
-        await ipcRenderer.invoke('exit')
+        await electron.exitApp()
       }
     } else {
-      await ipcRenderer.invoke('exit')
+      await electron.exitApp()
     }
   }
 
@@ -832,22 +793,8 @@
    * Scan the notes directory and return a master list of notes
    * @returns {array} - List of notes
    */
-  function gatherNotes () {
-    const txtFiles = []
-
-    // read all txt files in chosen directory
-    klawSync(baseDir, { depthLimit: 0 }).forEach(file => {
-      if (file.path.includes('.txt')) {
-        const fileName = path.basename(file.path)
-
-        txtFiles.push({
-          fileName: fileName,
-          name: fileName.slice(0, -4), // file name with .txt chopped off
-          dateCode: file.stats.mtimeMs,
-          content: fs.readFileSync(file.path, 'utf8')
-        })
-      }
-    })
+  async function gatherNotes () {
+    const txtFiles = await electron.gatherNotes(baseDir)
 
     // sort files by modified date
     txtFiles.sort(sortByDate)
@@ -859,20 +806,13 @@
    * Add a new note to the master notes list
    * @param {string} path - Path to new note file
    */
-  function addNote (file) {
-    const fileName = path.basename(file)
-
+  async function addNote (fileName) {
     // ensure this is a new note
     if (!txtFiles.find(item => item.fileName === fileName)) {
-      const stats = fs.statSync(file)
+      const noteData = await electron.getNoteInfo(baseDir, fileName)
 
       // add file to master note list
-      txtFiles.push({
-        fileName: fileName,
-        name: fileName.slice(0, -4), // file name with .txt chopped off
-        dateCode: stats.mtimeMs,
-        content: fs.readFileSync(file, 'utf8')
-      })
+      txtFiles.push(noteData)
 
       // sort files by modified date
       txtFiles.sort(sortByDate)
@@ -883,8 +823,7 @@
    * Remove a note from the master notes list
    * @param {string} file - Path to note being removed
    */
-  function removeNote (file) {
-    const fileName = path.basename(file)
+  function removeNote (fileName) {
     const index = txtFiles.findIndex(item => item.fileName === fileName)
 
     if (index !== -1) {
@@ -922,17 +861,17 @@
   /**
    * Clear search form and files cache
    */
-  function clearSearch () {
+  async function clearSearch () {
     searchFiles = []
     searchInput.value = ''
-    reloadFileList(txtFiles)
+    await reloadFileList(txtFiles)
   }
 
   /**
    * Perform a fresh render of the file list
    * @param {array} notes - List of notes to render
    */
-  function reloadFileList (notes) {
+  async function reloadFileList (notes) {
     const model = {}
     let editedFileCache
 
@@ -949,7 +888,7 @@
 
     // store contents of files in model and render template with it
     model.txtFiles = notes
-    const newTemplate = teddy.render(noteListTemplate, model)
+    const newTemplate = await electron.renderTemplate('noteListTemplate', model)
     fileNameContainer.innerHTML = newTemplate
 
     // get fresh reference to list of files
@@ -986,7 +925,7 @@
   /**
    * Save changes to file
    */
-  function saveFile () {
+  async function saveFile () {
     // set in memory file content
     currentFile.setContent(fileViewer.value)
 
@@ -994,7 +933,8 @@
     currentFile.setModifyDate(dayjs().valueOf())
 
     // write new file data
-    fs.writeFileSync(path.join(baseDir, currentFile.name), fileViewer.value)
+    // fs.writeFileSync(path.join(baseDir, currentFile.name), fileViewer.value)
+    await electron.updateNote(baseDir, currentFile.name, fileViewer.value)
 
     // run sort by modified date on master notes array
     txtFiles.sort(sortByDate)
@@ -1018,15 +958,7 @@
     lastModified.innerHTML = dayjs(currentFile.modifyDate).format('MMMM D, YYYY, h:mm a')
   }
 
-  /**
-   * Determine if element is a file name by coordinate
-   * @param {number} x - X axis coordinate of document
-   * @param {number} y - Y axis coordinate of document
-   * @returns {boolean} - If element is a file in the list
-   */
-  function elementIsFile (x, y) {
-    const element = document.elementsFromPoint(x, y)[0]
-
+  function elementIsFile (element) {
     if (lockSelection) {
       return false
     }
@@ -1046,30 +978,12 @@
    * @param {number} y - Y axis coordinate of document
    * @returns {boolean} - If element is the file list container
    */
-  function elementIsFileList (x, y) {
-    const elements = document.elementsFromPoint(x, y)
-
-    for (const element of elements) {
-      if (element.id === 'txtFileList') {
-        return true
-      }
+  function elementIsFileList (element) {
+    if (element.id === 'txtFileList') {
+      return true
     }
 
     return false
-  }
-
-  /**
-   * Check if a file exists
-   * @param {string} path - Path to file
-   * @returns {boolean} - If file exists at path
-   */
-  function fileExists (path) {
-    try {
-      fs.accessSync(path)
-      return true
-    } catch (e) {
-      return false
-    }
   }
 
   /**
