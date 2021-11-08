@@ -5,6 +5,7 @@
 - Update Electron to v15.3.0.
 - [Disable browser node integration and enable context isolation](https://www.electronjs.org/docs/latest/tutorial/context-isolation).
 - [Enable browser process sandboxing](https://www.electronjs.org/docs/latest/tutorial/sandbox).
+- [RIP Spectron placeholder test](https://github.com/electron-userland/spectron/issues/1045).
 - Size of file list pane is now remembered and restored when loading the app.
 - Fix bug where file list pane would get larger or smaller relative to window size.
 - Fix bug where renaming a file would set modified date to a far flung future time.

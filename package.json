@@ -20,8 +20,6 @@
     "electron": "~15.3.0",
     "electron-builder": "~22.13.1",
     "electron-reloader": "~1.2.1",
-    "mocha": "~9.1.3",
-    "spectron": "~15.0.0",
     "standard": "~16.0.4",
     "stylelint": "~14.0.1",
     "stylelint-config-standard": "~23.0.0"
@@ -37,6 +35,6 @@
     "pack": "electron-builder --dir",
     "lint": "standard && stylelint *.css",
     "start": "electron .",
-    "test": "mocha"
+    "test": "npm run lint"
   }
 }
