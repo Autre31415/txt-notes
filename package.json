@@ -1,28 +1,28 @@
 {
   "name": "txt-notes",
-  "version": "0.3.0",
-  "description": "Manage txt files like the notes app",
+  "version": "0.3.1",
+  "description": "A no frills note taking app that works with txt files",
   "main": "main.js",
   "author": "Troy Coutu",
   "license": "CC0-1.0",
   "dependencies": {
-    "chokidar": "~3.5.2",
-    "dayjs": "~1.10.7",
-    "electron-context-menu": "~3.1.1",
+    "chokidar": "~3.5.3",
+    "dayjs": "~1.10.8",
+    "electron-context-menu": "~3.1.2",
     "electron-store": "~8.0.1",
     "electron-window-state": "~5.0.3",
-    "fs-extra": "~10.0.0",
+    "fs-extra": "~10.0.1",
     "klaw-sync": "~6.0.0",
     "split-grid": "~1.0.11",
-    "teddy": "~0.5.9"
+    "teddy": "~0.5.10"
   },
   "devDependencies": {
-    "electron": "~15.3.0",
-    "electron-builder": "~22.13.1",
-    "electron-reloader": "~1.2.1",
+    "electron": "~17.1.1",
+    "electron-builder": "~22.14.13",
+    "electron-reloader": "~1.2.3",
     "standard": "~16.0.4",
-    "stylelint": "~14.0.1",
-    "stylelint-config-standard": "~23.0.0"
+    "stylelint": "~14.5.3",
+    "stylelint-config-standard": "~25.0.0"
   },
   "build": {
     "appId": "com.autre.txtnotes",

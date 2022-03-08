@@ -1,6 +1,12 @@
 # txt-notes Changelog
 
-## 0.3.0 (11/8/20)
+## 0.3.1 (3/8/22)
+
+- Update Electron to v17.1.1
+- There's finally a README!
+- Various dependencies updated.
+
+## 0.3.0 (11/8/21)
 
 - Update Electron to v15.3.0.
 - [Disable browser node integration and enable context isolation](https://www.electronjs.org/docs/latest/tutorial/context-isolation).
