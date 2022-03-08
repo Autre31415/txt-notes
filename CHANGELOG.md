@@ -268,7 +268,7 @@
 - Clicking refresh keeps current selection including edits
 - Added 'copy file name' context menu item
 
-## 10/16/17
+## 10/16/18
 
 - Add form to select base directory
 - Add button to change base directory to main toolbar
