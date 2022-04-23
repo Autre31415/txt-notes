@@ -383,6 +383,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         event.target.setCustomValidity('Please enter a file name')
       }
 
+      event.target.reportValidity()
+
       // enter key indicates finished name
       if (key === 'Enter' && event.target.checkValidity()) {
         event.preventDefault()
@@ -722,20 +724,22 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     // ensure file name doesn't match another file
     if (input.value !== oldFileName) {
       if (txtFiles.find(item => item.fileName === possibleFileName)) {
-        input.setCustomValidity('This file matches another file')
+        input.setCustomValidity('This name matches another file')
         valid = false
       }
     }
 
     // ensure file name doesn't include invalid character
     if (/[<>:"/\\|?*]/.test(input.value)) {
-      input.setCustomValidity('This name includes an illegal character')
+      input.setCustomValidity('This name includes an invalid character')
       valid = false
     }
 
     if (valid) {
       input.setCustomValidity('')
     }
+
+    input.reportValidity()
   }
 
   /**

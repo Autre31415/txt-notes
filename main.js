@@ -74,7 +74,7 @@ ipc.handle('gatherNotes', (event, baseDir) => {
 
       // add data pertaining to each note to the array
       txtFiles.push({
-        fileName: fileName,
+        fileName,
         name: fileName.slice(0, -4), // file name with .txt chopped off
         dateCode: file.stats.mtimeMs,
         content: fs.readFileSync(file.path, 'utf8')
@@ -106,7 +106,7 @@ ipc.handle('getNoteInfo', (event, baseDir, fileName) => {
   const file = path.join(baseDir, fileName)
   const stats = fs.statSync(file)
   const noteData = {
-    fileName: fileName,
+    fileName,
     name: fileName.slice(0, -4), // file name with .txt chopped off
     dateCode: stats.mtimeMs,
     content: fs.readFileSync(file, 'utf8')
