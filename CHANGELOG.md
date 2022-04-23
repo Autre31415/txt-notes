@@ -1,5 +1,11 @@
 # txt-notes Changelog
 
+## 0.3.2 (3/8/22)
+
+- Update Electron to v18.1.0.
+- Validity tooltips now show up when typing an invalid name while naming/renaming a file.
+- Various dependencies updated.
+
 ## 0.3.1 (3/8/22)
 
 - Update Electron to v17.1.1
