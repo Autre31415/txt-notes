@@ -1,5 +1,10 @@
 # txt-notes Changelog
 
+## 0.3.3 (6/18/22)
+
+- Added arm64 distrbution for macOS.
+- Update Electron to v19.0.8
+
 ## 0.3.2 (4/22/22)
 
 - Update Electron to v18.1.0.

@@ -1,6 +1,6 @@
 const path = require('path')
 const fs = require('fs-extra')
-const klawSync = require('klaw-sync')
+const klaw = require('klaw')
 const teddy = require('teddy')
 const { app, BrowserWindow, clipboard, dialog, ipcMain: ipc } = require('electron')
 const windowStateKeeper = require('electron-window-state')
@@ -35,7 +35,7 @@ let elementIsFileList
 // auto reload window in dev mode
 try {
   require('electron-reloader')(module, { ignore: 'tmp' })
-} catch (err) { }
+} catch {}
 
 // handle app exit
 ipc.handle('exit', () => {
@@ -47,10 +47,10 @@ ipc.handle('exit', () => {
  */
 
 // handle getting electron-store values
-ipc.handle('storeGet', (event, key) => {
+ipc.handle('storeGet', async (event, key) => {
   // on a request for baseDir in dev mode return the tmp directory
   if (isDev && key === 'baseDir') {
-    fs.ensureDirSync(('./tmp'))
+    await fs.ensureDir(('./tmp'))
     return './tmp'
   }
 
@@ -63,12 +63,12 @@ ipc.handle('platform', (event) => {
 })
 
 // gather up each note in the base directory
-ipc.handle('gatherNotes', (event, baseDir) => {
+ipc.handle('gatherNotes', async (event, baseDir) => {
   // start an array for txt files
   txtFiles = []
 
   // read all txt files in chosen directory
-  klawSync(baseDir, { depthLimit: 0 }).forEach(file => {
+  for await (const file of klaw(baseDir, { depthLimit: 0 })) {
     if (file.path.includes('.txt')) {
       const fileName = path.basename(file.path)
 
@@ -77,10 +77,10 @@ ipc.handle('gatherNotes', (event, baseDir) => {
         fileName,
         name: fileName.slice(0, -4), // file name with .txt chopped off
         dateCode: file.stats.mtimeMs,
-        content: fs.readFileSync(file.path, 'utf8')
+        content: await fs.readFile(file.path, 'utf8')
       })
     }
-  })
+  }
 
   return txtFiles
 })
@@ -91,25 +91,25 @@ ipc.handle('initWatcher', async (event, baseDir) => {
 })
 
 // create a new blank note file
-ipc.handle('addNote', (event, baseDir, newFileName) => {
+ipc.handle('addNote', async (event, baseDir, newFileName) => {
   const newFilePath = path.join(baseDir, newFileName)
-  fs.openSync(newFilePath, 'a')
+  await fs.open(newFilePath, 'a')
 })
 
 // update file contents
-ipc.handle('updateNote', (event, baseDir, fileName, content) => {
-  fs.writeFileSync(path.join(baseDir, fileName), content)
+ipc.handle('updateNote', async (event, baseDir, fileName, content) => {
+  await fs.writeFile(path.join(baseDir, fileName), content)
 })
 
 // return an information object for a note by path
-ipc.handle('getNoteInfo', (event, baseDir, fileName) => {
+ipc.handle('getNoteInfo', async (event, baseDir, fileName) => {
   const file = path.join(baseDir, fileName)
-  const stats = fs.statSync(file)
+  const stats = await fs.stat(file)
   const noteData = {
     fileName,
     name: fileName.slice(0, -4), // file name with .txt chopped off
     dateCode: stats.mtimeMs,
-    content: fs.readFileSync(file, 'utf8')
+    content: await fs.readFile(file, 'utf8')
   }
 
   return noteData
@@ -126,8 +126,8 @@ ipc.on('storeSet', (event, key, value) => {
 })
 
 // handle checking if a file exists
-ipc.handle('fileExists', (event, file) => {
-  return fileExists(file)
+ipc.handle('fileExists', async (event, file) => {
+  return await fs.pathExists(file)
 })
 
 // handle close confirmation dialog
@@ -164,7 +164,7 @@ ipc.handle('removeHandler', async (event, baseDir, fileName) => {
   // 1 means yes
   if (result.response === 1) {
     const file = path.join(baseDir, fileName)
-    fs.unlinkSync(file)
+    await fs.unlink(file)
     return true
   }
 
@@ -176,10 +176,10 @@ ipc.handle('renameHandler', async (event, baseDir, oldFileName, newFileName, now
   const date = new Date(nowTime)
 
   // rename the file itself
-  fs.renameSync(path.join(baseDir, oldFileName), path.join(baseDir, newFileName))
+  await fs.rename(path.join(baseDir, oldFileName), path.join(baseDir, newFileName))
 
   // update file modified time
-  fs.utimesSync(path.join(baseDir, newFileName), date, date)
+  await fs.utimes(path.join(baseDir, newFileName), date, date)
 })
 
 // handle directory picker dialog
@@ -285,20 +285,6 @@ app.on('ready', createWindow)
 app.on('window-all-closed', function () {
   app.quit()
 })
-
-/**
- * Check if a file exists
- * @param {string} path - Path to file
- * @returns {boolean} - If file exists at path
- */
-function fileExists (path) {
-  try {
-    fs.accessSync(path)
-    return true
-  } catch (e) {
-    return false
-  }
-}
 
 /**
  * Initialize watch events for selected directory
