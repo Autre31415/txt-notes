@@ -328,10 +328,12 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
       if (currentFile && currentFile.edited) {
         const result = await electron.confirmNavigateAway(currentFile.name)
 
-        if (result.response === 1) {
+        if (result.response === 1) { // yes
           await saveFile()
           clearSelection()
           await reloadFileList(searchFiles)
+        } else if (result.response ===2) { // cancel
+          return false
         } else {
           clearSelection()
           await reloadFileList(searchFiles)
@@ -458,9 +460,11 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         // spin up confirmation dialog
         const result = await electron.confirmNavigateAway(currentFile.name)
 
-        if (result.response === 1) {
+        if (result.response === 1) { // yes
           await saveFile()
           fileSelection()
+        } else if (result.response === 2) { // cancel
+            return false
         } else {
           fileSelection()
         }
