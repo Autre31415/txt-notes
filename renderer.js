@@ -332,9 +332,9 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
           await saveFile()
           clearSelection()
           await reloadFileList(searchFiles)
-        } else if (result.response ===2) { // cancel
+        } else if (result.response === 2) { // cancel
           return false
-        } else {
+        } else { // no
           clearSelection()
           await reloadFileList(searchFiles)
         }
@@ -464,8 +464,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
           await saveFile()
           fileSelection()
         } else if (result.response === 2) { // cancel
-            return false
-        } else {
+          return false
+        } else { // no
           fileSelection()
         }
       } else {
@@ -789,7 +789,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         await electron.exitApp()
       } else if (result.response === 2) { // cancel
         return false
-      } else {
+      } else { // no
         await electron.exitApp()
       }
     } else {
