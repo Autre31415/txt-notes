@@ -146,7 +146,7 @@ ipc.handle('confirmClose', async (event, fileName) => {
 ipc.handle('confirmNavigateAway', async (event, fileName) => {
   const result = await dialog.showMessageBox({
     type: 'question',
-    buttons: ['No', 'Yes'],
+    buttons: ['No', 'Yes', 'Cancel'],
     message: `Would you like to save ${fileName}?`
   })
 
