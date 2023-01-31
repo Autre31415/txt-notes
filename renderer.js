@@ -27,6 +27,9 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
   // last modified field above the text editor
   let lastModified
 
+  // printable area
+  let printArea
+
   // current selected file
   let currentFile
 
@@ -55,6 +58,16 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         // only init save when the file was edited
         if (currentFile.edited) {
           await saveFile()
+        }
+        break
+      case 'print':
+        // only try printing when looking at a file
+        if (currentFile) {
+          // this nonsense is necessary because of https://stackoverflow.com/a/4611247
+          // TODO: Consider replacing the textarea with another element wholesale
+          printArea.innerText = currentFile.content
+
+          await electron.printNote()
         }
         break
       case 'copyFileName':
@@ -275,6 +288,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     lastModified = document.getElementById('lastModified')
     fileNameContainer = document.getElementById('fileNames')
     searchInput = document.getElementById('search')
+    printArea = document.getElementById('printArea')
 
     grid.style['grid-template-columns'] = await electron.storeGet('columnSize') || '200px 2px 1fr'
 

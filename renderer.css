@@ -205,3 +205,22 @@ input:valid {
 ::-webkit-scrollbar-thumb {
   background-color: #363636;
 }
+
+#printArea {
+  display: none;
+}
+
+@media print {
+  header,
+  #txtFileList,
+  #lastModified,
+  #txtFileView,
+  .gutter {
+    display: none;
+  }
+
+  #printArea {
+    display: inline;
+    position: absolute;
+  }
+}
