@@ -32,6 +32,13 @@ module.exports = window => {
             window.webContents.send('ping', 'save')
           }
         },
+        {
+          label: 'Print...',
+          accelerator: 'CmdOrCtrl+P',
+          click: () => {
+            window.webContents.send('ping', 'print')
+          }
+        },
         { type: 'separator' },
         isMac ? { role: 'close' } : { role: 'quit' }
       ]

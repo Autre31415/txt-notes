@@ -14,6 +14,7 @@ process.once('loaded', () => {
     initWatcher: async (...params) => await ipc.invoke('initWatcher', ...params),
     listen: callback => ipc.on('ping', callback),
     platform: async () => await ipc.invoke('platform'),
+    printNote: async (...params) => await ipc.invoke('printNote', ...params),
     removeHandler: async (...params) => await ipc.invoke('removeHandler', ...params),
     renameHandler: async (...params) => await ipc.invoke('renameHandler', ...params),
     renderTemplate: async (...params) => await ipc.invoke('renderTemplate', ...params),

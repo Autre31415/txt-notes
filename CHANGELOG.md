@@ -1,9 +1,20 @@
 # txt-notes Changelog
 
+## Next version
+
+- Put changes here...
+
+## 0.3.4 (1/30/23)
+
+- Added cancel option to save changes dialogs (thanks [aaron9127](https://github.com/aaron9127)!).
+- Added ability to print currently viewed file.
+- Update Electron to v22.1.0.
+- Various dependencies updated.
+
 ## 0.3.3 (6/18/22)
 
 - Added arm64 distrbution for macOS.
-- Update Electron to v19.0.8
+- Update Electron to v19.0.8.
 
 ## 0.3.2 (4/22/22)
 
@@ -13,7 +24,7 @@
 
 ## 0.3.1 (3/8/22)
 
-- Update Electron to v17.1.1
+- Update Electron to v17.1.1.
 - There's finally a README!
 - Various dependencies updated.
 
@@ -43,7 +54,7 @@
 
 ## 0.2.2 (10/4/20)
 
-- Update Electron to v10.1.3
+- Update Electron to v10.1.3.
 - File add/rename enhancements:
   - Operation can be exited by clicking outside the field.
   - Text is auto selected.

@@ -62,6 +62,13 @@ ipc.handle('platform', (event) => {
   return process.platform
 })
 
+// open native print dialog for currently viewed note
+ipc.handle('printNote', () => {
+  mainWindow.webContents.print({
+    color: false
+  })
+})
+
 // gather up each note in the base directory
 ipc.handle('gatherNotes', async (event, baseDir) => {
   // start an array for txt files
