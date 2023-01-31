@@ -6,7 +6,7 @@
 
 ## 0.3.4 (1/30/23)
 
-- Added cancel option to save changes dialogs (thanks @aaron9127!).
+- Added cancel option to save changes dialogs (thanks [aaron9127](https://github.com/aaron9127)!).
 - Added ability to print currently viewed file.
 - Update Electron to v22.1.0.
 - Various dependencies updated.
