@@ -140,10 +140,11 @@ ipc.handle('fileExists', async (event, file) => {
 // handle close confirmation dialog
 ipc.handle('confirmClose', async (event, fileName) => {
   const result = await dialog.showMessageBox({
-    type: 'question',
+    type: 'warning',
     title: 'Confirm',
-    buttons: ['Yes', 'No', 'Cancel'],
-    message: `Would you like to save ${fileName} before closing?`
+    buttons: ['Save', "Don't Save", 'Cancel'],
+    message: `Would you like to save ${fileName} before closing?`,
+    default: 0
   })
 
   return result
@@ -152,9 +153,10 @@ ipc.handle('confirmClose', async (event, fileName) => {
 // handle navigate away confirmation dialog
 ipc.handle('confirmNavigateAway', async (event, fileName) => {
   const result = await dialog.showMessageBox({
-    type: 'question',
-    buttons: ['No', 'Yes', 'Cancel'],
-    message: `Would you like to save ${fileName}?`
+    type: 'warning',
+    buttons: ['Save', "Don't Save", 'Cancel'],
+    message: `Would you like to save ${fileName}?`,
+    default: 0
   })
 
   return result
