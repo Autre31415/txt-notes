@@ -4,7 +4,7 @@
 
 - Put changes here...
 
-## 0.3.5 ()
+## 0.3.5 (2/1/24)
 
 - Improved clarity of save confirmation dialogs (thanks [aaron9127](https://github.com/aaron9127)!).
 - Updated Electron to v28.2.1
