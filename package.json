@@ -1,33 +1,34 @@
 {
   "name": "txt-notes",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "A no frills note taking app that works with txt files",
   "main": "main.js",
   "author": "Troy Coutu",
   "license": "CC0-1.0",
   "dependencies": {
-    "chokidar": "~3.5.3",
-    "dayjs": "~1.11.7",
-    "electron-context-menu": "~3.6.1",
-    "electron-store": "~8.1.0",
-    "electron-window-state": "~5.0.3",
-    "fs-extra": "~11.1.0",
-    "klaw": "~4.1.0",
-    "split-grid": "~1.0.11",
-    "teddy": "~0.5.10"
+    "chokidar": "3.5.3",
+    "dayjs": "1.11.10",
+    "electron-context-menu": "3.6.1",
+    "electron-store": "8.1.0",
+    "electron-window-state": "5.0.3",
+    "fs-extra": "11.2.0",
+    "klaw": "4.1.0",
+    "split-grid": "1.0.11",
+    "teddy": "0.6.5"
   },
   "devDependencies": {
-    "electron": "~22.1.0",
-    "electron-builder": "~23.6.0",
-    "electron-reloader": "~1.2.3",
-    "standard": "~17.0.0",
-    "stylelint": "~14.16.1",
-    "stylelint-config-standard": "~29.0.0"
+    "electron": "28.2.1",
+    "electron-builder": "24.9.1",
+    "electron-reloader": "1.2.3",
+    "standard": "17.1.0",
+    "stylelint": "16.2.1",
+    "stylelint-config-standard": "36.0.0"
   },
   "scripts": {
     "dist": "electron-builder --mac --windows",
     "pack": "electron-builder --dir",
     "lint": "standard && stylelint *.css",
+    "lint-fix": "standard --fix && stylelint *.css --fix",
     "start": "electron .",
     "test": "npm run lint"
   }

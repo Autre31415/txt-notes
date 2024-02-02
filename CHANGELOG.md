@@ -4,6 +4,12 @@
 
 - Put changes here...
 
+## 0.3.5 ()
+
+- Improved clarity of save confirmation dialogs (thanks [aaron9127](https://github.com/aaron9127)!).
+- Updated Electron to v28.2.1
+- Updated various dependencies.
+
 ## 0.3.4 (1/30/23)
 
 - Added cancel option to save changes dialogs (thanks [aaron9127](https://github.com/aaron9127)!).
