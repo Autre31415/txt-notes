@@ -16,7 +16,7 @@ I specifically wasn't a fan of how Apple notes stores notes files in email form,
 
 [Download](https://github.com/Autre31415/txt-notes/releases/latest) the `.dmg` file.
 
-### Windows 7+
+### Windows 10+
 
 [Download](https://github.com/Autre31415/txt-notes/releases/latest) the `.exe` file.
 
