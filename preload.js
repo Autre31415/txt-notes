@@ -21,6 +21,7 @@ process.once('loaded', () => {
     storeGet: async (...params) => await ipc.invoke('storeGet', ...params),
     storeSet: (...params) => ipc.send('storeSet', ...params),
     updateNote: async (...params) => await ipc.invoke('updateNote', ...params),
+    updateTitle: async (...params) => await ipc.invoke('updateTitle', ...params),
     writeClipboard: async (...params) => await ipc.invoke('writeClipboard', ...params)
   })
 })

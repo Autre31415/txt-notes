@@ -11,18 +11,14 @@ header {
   background-color: #2b2f31;
   height: 35px;
   user-select: none;
-  -webkit-app-region: drag;
 }
 
 nav {
-  margin-left: 5px;
-}
-
-.darwin-nav {
-  margin-left: 80px;
+  margin-left: 10px;
 }
 
 button {
+  cursor: pointer;
   background-color: #454545;
   color: #fff;
   font-weight: 700;
@@ -69,7 +65,7 @@ button:active {
 }
 
 #saveFile {
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m0 2c0-1.1.9-2 2-2h14l4 4v14a2 2 0 0 1 -2 2h-16a2 2 0 0 1 -2-2zm5 0v6h10v-6zm6 1h3v4h-3z"/></svg>');
+  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m172 522c0-.553.448-1 1-1s1 .447 1 1v4c0 .553-.448 1-1 1s-1-.447-1-1zm-9 7h14c.552 0 1-.447 1-1v-11h-16v11c0 .553.448 1 1 1zm19-12h-2v12c0 1.104-.896 2-2 2h-16c-1.104 0-2-.896-2-2v-12h-2c-2.209 0-4 1.791-4 4v24c0 2.209 1.791 4 4 4h24c2.209 0 4-1.791 4-4v-24c0-2.209-1.791-4-4-4z" fill-rule="evenodd" transform="translate(-154 -517)"/></svg>');
 }
 
 #refreshButton {

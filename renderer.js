@@ -477,21 +477,21 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
         if (result.response === 0) { // yes
           await saveFile()
-          fileSelection()
+          await fileSelection()
         } else if (result.response === 2) { // cancel
           return false
         } else { // no
-          fileSelection()
+          await fileSelection()
         }
       } else {
-        fileSelection()
+        await fileSelection()
       }
     }
 
     /**
      * Highlight selected file and remove highlight from other files
      */
-    function fileSelection () {
+    async function fileSelection () {
       // highlight selection
       element.classList.add('highlight')
 
@@ -510,6 +510,9 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
       // populate text editor with file content
       fileViewer.value = currentFile.content
+
+      // update window title
+      await electron.updateTitle(currentFile.name)
     }
   }
 
