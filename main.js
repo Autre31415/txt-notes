@@ -108,6 +108,11 @@ ipc.handle('updateNote', async (event, baseDir, fileName, content) => {
   await fs.writeFile(path.join(baseDir, fileName), content)
 })
 
+// update window title to include file name
+ipc.handle('updateTitle', async (event, name) => {
+  mainWindow.setTitle(`${name} — ${app.getName()}`)
+})
+
 // return an information object for a note by path
 ipc.handle('getNoteInfo', async (event, baseDir, fileName) => {
   const file = path.join(baseDir, fileName)
@@ -233,8 +238,7 @@ function createWindow () {
       preload: path.resolve(app.getAppPath(), 'preload.js'),
       contextIsolation: true,
       sandbox: true
-    },
-    titleBarStyle: 'hiddenInset'
+    }
   })
 
   // and load the main entrypoint (main.html)

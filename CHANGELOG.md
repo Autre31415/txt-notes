@@ -4,6 +4,12 @@
 
 - Put changes here...
 
+## 0.3.6 (2/5/24)
+
+- Introduced native title bar and updated window title to include selected file name.
+- Fixed a bug where navigation buttons and search were inoperable.
+- Updated save file icon.
+
 ## 0.3.5 (2/1/24)
 
 - Improved clarity of save confirmation dialogs (thanks [aaron9127](https://github.com/aaron9127)!).
