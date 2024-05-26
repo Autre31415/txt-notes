@@ -77,7 +77,22 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         addHandler()
         break
       case 'renameFile':
-        renameFileHandler()
+        // spin up a save confirmation if the file to be renamed has unsaved changed
+        if (currentFile && currentFile.edited) {
+          const result = await electron.confirmNavigateAway(currentFile.name)
+
+          if (result.response === 0) { // yes
+            await saveFile()
+            renameFileHandler()
+          } else if (result.response === 2) { // cancel
+            return false
+          } else { // no
+            clearSelection()
+            renameFileHandler()
+          }
+        } else {
+          renameFileHandler()
+        }
         break
       case 'deleteFile':
         await removeHandler()
@@ -213,8 +228,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     }
   })
 
-  // bind event listener for arrow file navigation
-  window.addEventListener('keydown', keySelectionHandler)
+  // bind event listener for various keyboard shortcuts
+  window.addEventListener('keydown', keyboardShortcutHandler)
 
   // entry point
   await configCheck()
@@ -388,8 +403,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     // fade out the text of surrounding elements
     fileNameContainer.classList.add('renaming')
 
-    // bind a click event to the entire file pane
-    fileNameContainer.parentNode.addEventListener('click', clickAwayAdd)
+    // clicking away will cancel add
+    window.addEventListener('click', clickAwayAdd)
 
     // bind event listeners to the file name input
     newFileInput.addEventListener('input', fileNameValidation)
@@ -430,6 +445,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         // remove adding file state
         addingFile = false
 
+        window.removeEventListener('click', clickAwayAdd)
+
         // select the new file and focus on the text editor
         selectFile(newFileValue)
         fileViewer.focus()
@@ -459,6 +476,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
       lockSelection = false
       lineItem.remove()
       fileNameContainer.classList.remove('renaming')
+      window.removeEventListener('click', clickAwayAdd)
       addingFile = false
     }
   }
@@ -650,8 +668,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     // fade out the text of surrounding elements
     fileNameContainer.classList.add('renaming')
 
-    // bind a click event to the entire file pane
-    fileNameContainer.parentNode.addEventListener('click', clickAwayRename)
+    // clicking away will cancel rename
+    main.addEventListener('click', clickAwayRename)
 
     /**
      * Event handler for confirming or canceling file rename
@@ -675,9 +693,6 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         // unlock file selection
         lockSelection = false
 
-        // clear current file cache
-        currentFile = null
-
         // create a new element for this renamed file
         const renamedNote = document.createElement('li')
         renamedNote.className = 'fileName'
@@ -686,6 +701,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         // insert the renamed note
         fileNameContainer.prepend(renamedNote)
         // fileNameContainer.insertBefore(renamedNote, fileNameContainer.firstChild)
+
+        main.removeEventListener('click', clickAwayRename)
 
         // select the updated note
         renamedNote.click()
@@ -721,8 +738,9 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     function escapeEdit () {
       fileRenameInput.remove()
       element.textContent = oldFileName.slice(0, -4)
+      element.classList.add('highlight')
       fileNameContainer.classList.remove('renaming')
-      fileNameContainer.parentNode.removeEventListener('click', clickAwayRename)
+      main.removeEventListener('click', clickAwayRename)
       lockSelection = false
     }
   }
@@ -765,10 +783,16 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
   }
 
   /**
-   * Event handler for arrow key navigation of file list
+   * Event handler for various keyboard shortcuts
    * @param {object} event - Keydown event
    */
-  function keySelectionHandler (event) {
+  async function keyboardShortcutHandler (event) {
+    // clearing a search
+    if (event.key === 'Escape' && searchInput.value && !lockSelection) {
+      await clearSearch()
+    }
+
+    // arrow navigation
     if (currentFile && event.target.tagName !== 'TEXTAREA' && event.target.tagName !== 'INPUT') {
       const element = currentFile.element
       const next = element.nextElementSibling

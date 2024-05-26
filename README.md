@@ -26,7 +26,7 @@ Be sure to have [Node.js](https://nodejs.org) and [git](https://git-scm.com) ins
 
 Then:
 
-```
+```bash
 git clone https://github.com/Autre31415/txt-notes.git
 cd txt-notes
 npm ci
@@ -41,7 +41,7 @@ Be sure to have [Node.js](https://nodejs.org) and [git](https://git-scm.com) ins
 
 First, be sure to run:
 
-```
+```bash
 git clone https://github.com/Autre31415/txt-notes.git
 cd txt-notes
 npm ci
@@ -51,12 +51,12 @@ Then:
 
 To build package zips use:
 
-```
+```bash
 npm run pack
 ```
 
 To build full distributions use:
 
-```
+```bash
 npm run dist
 ```

@@ -4,11 +4,11 @@ const klaw = require('klaw')
 const teddy = require('teddy')
 const { app, BrowserWindow, clipboard, dialog, ipcMain: ipc } = require('electron')
 const windowStateKeeper = require('electron-window-state')
-const Store = require('electron-store')
-const store = new Store()
-const contextMenu = require('electron-context-menu')
 const chokidar = require('chokidar')
 const isDev = !app.isPackaged
+
+// global reference to initialized electron-store
+let store
 
 // directory picker template
 const dirPickerTemplate = fs.readFileSync(path.join(__dirname, 'templates/firstLoad.html'), 'utf8')
@@ -220,7 +220,13 @@ ipc.handle('renderTemplate', async (event, templateName, model) => {
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
-function createWindow () {
+async function createWindow () {
+  // dynamic import on modules that don't support commonjs
+  const { default: Store } = await import('electron-store')
+  const { default: contextMenu } = await import('electron-context-menu')
+
+  store = new Store()
+
   const mainWindowState = windowStateKeeper({
     defaultWidth: 1400,
     defaultHeight: 800

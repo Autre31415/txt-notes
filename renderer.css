@@ -166,6 +166,7 @@ ul li {
   outline: none;
   box-shadow: none;
   border: none;
+  padding: 0;
 }
 
 .highlight {
