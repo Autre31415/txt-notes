@@ -4,6 +4,17 @@
 
 - Put changes here...
 
+## 0.3.7 (5/26/24)
+
+- Added ability to clear search input by pressing the escape key.
+- Fixed a bug where adding/renaming notes would break when clicking the note editor.
+- Fixed a bug where renaming a note with unsaved edits would cause those edits to be lost.
+- Fixed a bug where multiple notes would appear to be selected when renaming a note.
+- Fixed a visual bug where cancelling the renaming of a selected note would also appear to deselect it.
+- Fixed a visual bug where adding/rename a note would shift the text of other note names.
+- Updated Electron to v30.0.8.
+- Updated various dependencies.
+
 ## 0.3.6 (2/5/24)
 
 - Introduced native title bar and updated window title to include selected file name.
