@@ -4,6 +4,12 @@
 
 - Put changes here...
 
+## 0.3.8 (6/18/24)
+
+- Fixed a bug where the note list would remain faded out after adding or renaming a note.
+- Updated Electron to v31.0.1.
+- Updated various dependencies.
+
 ## 0.3.7 (5/26/24)
 
 - Added ability to clear search input by pressing the escape key.

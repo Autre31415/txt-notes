@@ -1,6 +1,6 @@
 {
   "name": "txt-notes",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "A no frills note taking app that works with txt files",
   "main": "main.js",
   "author": "Troy Coutu",
@@ -9,7 +9,7 @@
     "chokidar": "3.6.0",
     "dayjs": "1.11.11",
     "electron-context-menu": "4.0.0",
-    "electron-store": "9.0.0",
+    "electron-store": "10.0.0",
     "electron-window-state": "5.0.3",
     "fs-extra": "11.2.0",
     "klaw": "4.1.0",
@@ -17,11 +17,11 @@
     "teddy": "0.6.7"
   },
   "devDependencies": {
-    "electron": "30.0.8",
+    "electron": "31.0.1",
     "electron-builder": "24.13.3",
     "electron-reloader": "1.2.3",
     "standard": "17.1.0",
-    "stylelint": "16.6.0",
+    "stylelint": "16.6.1",
     "stylelint-config-standard": "36.0.0"
   },
   "scripts": {

@@ -435,6 +435,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
         // allow files to be selected again
         lockSelection = false
+        fileNameContainer.classList.remove('renaming')
 
         // add the note to the global list
         await addNote(newFileName)
@@ -692,6 +693,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
         // unlock file selection
         lockSelection = false
+        fileNameContainer.classList.remove('renaming')
 
         // create a new element for this renamed file
         const renamedNote = document.createElement('li')
@@ -700,7 +702,6 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
         // insert the renamed note
         fileNameContainer.prepend(renamedNote)
-        // fileNameContainer.insertBefore(renamedNote, fileNameContainer.firstChild)
 
         main.removeEventListener('click', clickAwayRename)
 
