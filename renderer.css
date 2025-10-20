@@ -14,10 +14,23 @@ header {
 }
 
 nav {
+  align-items: center;
+  app-region: drag;
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: space-between;
   margin-left: 10px;
+  max-width: 100%;
 }
 
-button {
+nav menu {
+  padding: 0;
+  margin: 0;
+  display: inline;
+}
+
+nav button {
+  app-region: no-drag;
   cursor: pointer;
   background-color: #454545;
   color: #fff;
@@ -31,6 +44,24 @@ button {
   background-position: center;
   margin-top: 6px;
   outline: none;
+}
+
+nav h1 {
+  color: gray;
+  display: inline;
+  flex: 1 1 auto;
+  font-size: 13px;
+  margin: 0;
+  width: 40px;
+  overflow: hidden;
+  padding: 0 5px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.darwin-nav {
+  margin-left: 80px;
 }
 
 #chooseBaseDir {
@@ -91,8 +122,6 @@ button:active {
   border: none;
   border-radius: 5px;
   vertical-align: top;
-  margin-top: 6px;
-  float: right;
   margin-right: 10px;
 }
 

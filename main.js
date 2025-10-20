@@ -4,7 +4,6 @@ const klaw = require('klaw')
 const teddy = require('teddy')
 const { app, BrowserWindow, clipboard, dialog, ipcMain: ipc } = require('electron')
 const windowStateKeeper = require('electron-window-state')
-const chokidar = require('chokidar')
 const isDev = !app.isPackaged
 
 // global reference to initialized electron-store
@@ -24,9 +23,6 @@ teddy.setTemplateRoot(path.join(__dirname, 'templates'))
 
 // a global reference to all notes in the watched folder
 let txtFiles
-
-// a global reference to file watcher instance
-let watcher
 
 // global references to info about last element right clicked
 let elementIsFile
@@ -90,11 +86,6 @@ ipc.handle('gatherNotes', async (event, baseDir) => {
   }
 
   return txtFiles
-})
-
-// handler for initializing file watcher
-ipc.handle('initWatcher', async (event, baseDir) => {
-  await initWatcher(baseDir)
 })
 
 // create a new blank note file
@@ -244,7 +235,8 @@ async function createWindow () {
       preload: path.resolve(app.getAppPath(), 'preload.js'),
       contextIsolation: true,
       sandbox: true
-    }
+    },
+    titleBarStyle: 'hiddenInset'
   })
 
   // and load the main entrypoint (main.html)
@@ -304,39 +296,3 @@ app.on('ready', createWindow)
 app.on('window-all-closed', function () {
   app.quit()
 })
-
-/**
- * Initialize watch events for selected directory
- * @param {string} baseDir - Path to notes directory
- */
-async function initWatcher (baseDir) {
-  // unsubscribe from a previous subscription if one exists
-  if (watcher) {
-    watcher.close()
-  }
-
-  // watch for file changes in base directory
-  watcher = chokidar.watch(baseDir, {
-    ignored: /(^|[/\\])\../,
-    ignoreInitial: true,
-    depth: 0
-  })
-
-  watcher
-    .on('add', file => {
-      const fileName = path.basename(file)
-
-      // only trigger for txt files
-      if (path.extname(file) === '.txt') {
-        mainWindow.webContents.send('ping', 'createFileEvent', fileName)
-      }
-    })
-    .on('unlink', file => {
-      const fileName = path.basename(file)
-
-      // only trigger for txt files
-      if (path.extname(file) === '.txt') {
-        mainWindow.webContents.send('ping', 'deleteFileEvent', fileName)
-      }
-    })
-}
