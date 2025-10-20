@@ -1,8 +1,14 @@
 # txt-notes Changelog
 
-## Next version
+## 0.3.9 (10/20/25)
 
-- Put changes here...
+- Merged navigation bar into title bar to reduce consumption of vertical space.
+- Removed the broken file watcher feature which fixes several bugs, this feature will be reimplemented in a future release.
+- Updated app icon.
+- Added linux builds.
+- Added arm64 build for Windows.
+- Fixed a bug where a newly created note would sometimes appear duplicated in the list.
+- Updated dependencies.
 
 ## 0.3.8 (6/18/24)
 

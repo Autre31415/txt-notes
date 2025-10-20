@@ -11,7 +11,6 @@ process.once('loaded', () => {
     fileExists: async (...params) => await ipc.invoke('fileExists', ...params),
     gatherNotes: async (...params) => await ipc.invoke('gatherNotes', ...params),
     getNoteInfo: async (...params) => await ipc.invoke('getNoteInfo', ...params),
-    initWatcher: async (...params) => await ipc.invoke('initWatcher', ...params),
     listen: callback => ipc.on('ping', callback),
     platform: async () => await ipc.invoke('platform'),
     printNote: async (...params) => await ipc.invoke('printNote', ...params),

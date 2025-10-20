@@ -21,6 +21,9 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
   // array of elements that refer to file names
   let fileList
 
+  // title in main navigation
+  let noteTitle
+
   // main text editor
   let fileViewer
 
@@ -64,7 +67,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         // only try printing when looking at a file
         if (currentFile) {
           // this nonsense is necessary because of https://stackoverflow.com/a/4611247
-          // TODO: Consider replacing the textarea with another element wholesale
+          // TODO: Consider replacing the textarea with a contenteditable element
           printArea.innerText = currentFile.content
 
           await electron.printNote()
@@ -96,24 +99,6 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
         break
       case 'deleteFile':
         await removeHandler()
-        break
-      case 'createFileEvent':
-        // only trigger for txt files not in the note list
-        if (!txtFiles.find(item => item.fileName === fileName)) {
-          await addNote(fileName)
-
-          // reload file list
-          await reloadFileList(txtFiles)
-        }
-        break
-      case 'deleteFileEvent':
-        // only trigger for txt files in the note list
-        if (txtFiles.find(item => item.fileName === fileName)) {
-          removeNote(fileName)
-
-          // reload file list
-          await reloadFileList(txtFiles)
-        }
         break
     }
   })
@@ -298,6 +283,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
     // grab a reference to file list and text area
     const grid = document.querySelector('#grid')
+    noteTitle = document.querySelector('nav h1')
     fileList = document.querySelectorAll('#fileNames li')
     fileViewer = document.querySelector('#fileEditor')
     lastModified = document.getElementById('lastModified')
@@ -328,9 +314,6 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
     // bind event listener to search input
     searchInput.addEventListener('input', debounce(searchHandler, 200))
-
-    // initialize the file watcher event system
-    await electron.initWatcher(baseDir)
   }
 
   /**
@@ -532,6 +515,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
 
       // update window title
       await electron.updateTitle(currentFile.name)
+      noteTitle.innerHTML = currentFile.name
     }
   }
 
@@ -560,6 +544,7 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     currentFile = null
     lastModified.innerHTML = ''
     fileViewer.value = ''
+    noteTitle.innerHTML = 'txt-notes'
   }
 
   /**
@@ -913,9 +898,11 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
    * Clear search form and files cache
    */
   async function clearSearch () {
-    searchFiles = []
-    searchInput.value = ''
-    await reloadFileList(txtFiles)
+    if (searchFiles.length || searchInput.value) {
+      searchFiles = []
+      searchInput.value = ''
+      await reloadFileList(txtFiles)
+    }
   }
 
   /**
