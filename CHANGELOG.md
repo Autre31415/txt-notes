@@ -1,5 +1,10 @@
 # txt-notes Changelog
 
+## 0.3.10 (11/7/25)
+
+- Fixed a bug where search input couldn't be clicked on.
+- Updated dependencies.
+
 ## 0.3.9 (10/20/25)
 
 - Merged navigation bar into title bar to reduce consumption of vertical space.

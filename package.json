@@ -1,12 +1,12 @@
 {
   "name": "txt-notes",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "description": "A no frills note taking app that works with txt files",
   "main": "main.js",
   "author": "Troy Coutu",
   "license": "CC0-1.0",
   "dependencies": {
-    "dayjs": "1.11.18",
+    "dayjs": "1.11.19",
     "electron-context-menu": "4.1.1",
     "electron-store": "11.0.2",
     "electron-window-state": "5.0.3",
@@ -18,7 +18,7 @@
   "devDependencies": {
     "@electron/asar": "4.0.1",
     "cross-env": "10.1.0",
-    "electron": "38.3.0",
+    "electron": "39.1.1",
     "electron-builder": "26.0.12",
     "electron-reloader": "1.2.3",
     "standard": "17.1.2",
