@@ -393,8 +393,38 @@ test('exports a note under a new name', async () => {
   }, exported)
 
   await contextMenu('note', 'exportNote')
-  await expect.poll(() => fs.existsSync(exported)).toBe(true)
-  expect(fs.readFileSync(exported, 'utf8')).toBe('exported text')
+  // the file exists before the copy finishes, and Windows locks it until then
+  await expect(() => expect(fs.readFileSync(exported, 'utf8')).toBe('exported text')).toPass()
+})
+
+test('keeps both panes on screen in small windows', async () => {
+  await launch({ 'note.txt': '' })
+  const width = selector => page.locator(selector).evaluate(element => element.offsetWidth)
+  const resize = size => app.evaluate(({ BrowserWindow }, size) => BrowserWindow.getAllWindows()[0].setContentSize(...size), size)
+  const dragGutter = async x => {
+    const gutter = await page.locator('.gutter').boundingBox()
+    await page.mouse.move(gutter.x + 1, 300)
+    await page.mouse.down()
+    await page.mouse.move(x, 300, { steps: 5 })
+    await page.mouse.up()
+  }
+
+  await resize([1000, 600])
+  await expect.poll(() => width('#grid')).toBe(1000)
+  await dragGutter(1)
+  await expect.poll(() => width('#txtFileList')).toBe(120)
+
+  await dragGutter(800)
+  await expect.poll(() => width('#txtFileList')).toBeGreaterThan(700)
+  const chosen = await width('#txtFileList')
+
+  await resize([500, 500])
+  await expect.poll(() => width('#txtFileView')).toBeGreaterThanOrEqual(248)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(500)
+
+  // the chosen width comes back once there's room for it
+  await resize([1000, 600])
+  await expect.poll(() => width('#txtFileList')).toBe(chosen)
 })
 
 test('shows notes in the file browser', async () => {

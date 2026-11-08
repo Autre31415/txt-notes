@@ -101,5 +101,8 @@
       }
     ],
     "artifactName": "${productName}-${version}-win-${arch}.${ext}"
+  },
+  "nsis": {
+    "buildUniversalInstaller": false
   }
 }

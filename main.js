@@ -525,19 +525,21 @@ async function createWindow () {
   contextMenu({
     prepend: (defaultActions, params, browserWindow) => [
       {
-        label: 'Copy File Name',
-        visible: elementIsFile,
-        click: () => mainWindow.webContents.send('ping', 'copyFileName')
+        label: 'New File…',
+        visible: elementIsFileList || elementIsFile,
+        click: () => mainWindow.webContents.send('ping', 'newFile')
       },
+      defaultActions.separator(),
       {
-        label: { darwin: 'Show in Finder', win32: 'Show in File Explorer' }[process.platform] || 'Show in Folder',
-        visible: elementIsFile,
-        click: () => mainWindow.webContents.send('ping', 'showInFolder')
-      },
-      {
-        label: elementIsPinned ? 'Unpin File' : 'Pin File',
+        label: elementIsPinned ? 'Unpin' : 'Pin',
         visible: elementIsFile,
         click: () => mainWindow.webContents.send('ping', 'togglePin')
+      },
+      defaultActions.separator(),
+      {
+        label: { darwin: 'Show in Finder', win32: 'Show in File Explorer' }[process.platform] || 'Open Containing Folder',
+        visible: elementIsFile,
+        click: () => mainWindow.webContents.send('ping', 'showInFolder')
       },
       {
         label: 'Export As…',
@@ -545,17 +547,18 @@ async function createWindow () {
         click: () => mainWindow.webContents.send('ping', 'exportNote')
       },
       {
-        label: 'New File',
-        visible: elementIsFileList || elementIsFile,
-        click: () => mainWindow.webContents.send('ping', 'newFile')
+        label: 'Copy Name',
+        visible: elementIsFile,
+        click: () => mainWindow.webContents.send('ping', 'copyFileName')
       },
+      defaultActions.separator(),
       {
-        label: 'Rename File',
+        label: 'Rename…',
         visible: elementIsFile,
         click: () => mainWindow.webContents.send('ping', 'renameFile')
       },
       {
-        label: 'Delete File',
+        label: 'Delete',
         visible: elementIsFile,
         click: () => mainWindow.webContents.send('ping', 'deleteFile')
       }
