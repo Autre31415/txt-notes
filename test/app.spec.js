@@ -97,11 +97,22 @@ function readNote (name) {
   return fs.readFileSync(path.join(notesDir, name + '.txt'), 'utf8')
 }
 
+// start every test from a clean slate so none depends on what ran before it
+test.beforeEach(() => {
+  app = page = dir = notesDir = null
+})
+
 test.afterEach(async () => {
-  // discard any unsaved edits so closing doesn't wait on a dialog
-  await answerDialogs(1)
-  await app.close()
-  fs.rmSync(dir, { recursive: true, force: true })
+  // a skipped test never launched the app, so there's nothing to clean up
+  if (app) {
+    // discard any unsaved edits so closing doesn't wait on a dialog
+    await answerDialogs(1)
+    await app.close()
+  }
+
+  if (dir) {
+    fs.rmSync(dir, { recursive: true, force: true })
+  }
 })
 
 test('lists notes newest first and opens them', async () => {
