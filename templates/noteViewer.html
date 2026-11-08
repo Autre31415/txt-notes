@@ -10,7 +10,7 @@
       <button class='addRemove' id='changeBaseDir' title='Change directory'></button>
     </menu>
     <h1>txt-notes</h1>
-    <input type='search' id='search' placeholder='Search'>
+    <span id='searchBox'><input type='search' id='search' placeholder='Search'></span>
   </nav>
 </header>
 <section id='grid'>
@@ -22,7 +22,18 @@
   <div class='gutter'></div>
   <section id='txtFileView' class='split split-horizontal'>
     <p id='lastModified'></p>
-    <textarea id='fileEditor'></textarea>
+    <div id='editor'>
+      <!-- copy of the note's text behind the editor, used to highlight find matches -->
+      <div id='findHighlights' aria-hidden='true' hidden></div>
+      <textarea id='fileEditor'></textarea>
+    </div>
+    <div id='findBar' hidden>
+      <input type='text' id='findInput' placeholder='Find' aria-label='Find in note'>
+      <span id='findCount'></span>
+      <button id='findPrevious' title='Previous match'></button>
+      <button id='findNext' title='Next match'></button>
+      <button id='findClose' title='Close'></button>
+    </div>
   </section>
   <section id='printArea'></section>
 </section>

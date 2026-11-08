@@ -1,8 +1,9 @@
-const { app, Menu } = require('electron')
+const { app, Menu, nativeTheme } = require('electron')
 
 const isMac = process.platform === 'darwin'
+const isDev = !app.isPackaged
 
-module.exports = window => {
+module.exports = (window, { checkForUpdates, setAppearance }) => {
   const template = [
     // { role: 'appMenu' }
     ...(isMac
@@ -71,16 +72,47 @@ module.exports = window => {
               { role: 'delete' },
               { type: 'separator' },
               { role: 'selectAll' }
-            ])
+            ]),
+        { type: 'separator' },
+        {
+          label: 'Find…',
+          accelerator: 'CmdOrCtrl+F',
+          click: () => window.webContents.send('ping', 'find')
+        },
+        {
+          label: 'Find Next',
+          accelerator: 'CmdOrCtrl+G',
+          click: () => window.webContents.send('ping', 'findNext')
+        },
+        {
+          label: 'Find Previous',
+          accelerator: 'Shift+CmdOrCtrl+G',
+          click: () => window.webContents.send('ping', 'findPrevious')
+        }
       ]
     },
     // { role: 'viewMenu' }
     {
       label: 'View',
       submenu: [
-        { role: 'reload' },
-        { role: 'forcereload' },
-        { role: 'toggledevtools' },
+        // reloading discards unsaved edits without asking, so it's only offered in dev
+        ...(isDev
+          ? [
+              { role: 'reload' },
+              { role: 'forcereload' },
+              { role: 'toggledevtools' },
+              { type: 'separator' }
+            ]
+          : []),
+        {
+          label: 'Appearance',
+          submenu: [['system', 'Match the system'], ['light', 'Light'], ['dark', 'Dark']].map(([appearance, label]) => ({
+            label,
+            type: 'radio',
+            checked: nativeTheme.themeSource === appearance,
+            click: () => setAppearance(appearance)
+          }))
+        },
         { type: 'separator' },
         { role: 'resetzoom' },
         { role: 'zoomin' },
@@ -116,6 +148,10 @@ module.exports = window => {
             const { shell } = require('electron')
             await shell.openExternal('https://github.com/Autre31415/txt-notes')
           }
+        },
+        {
+          label: 'Check for Updates…',
+          click: () => checkForUpdates()
         }
       ]
     }

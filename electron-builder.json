@@ -8,10 +8,14 @@
     "**/*",
     "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
     "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-    "!**/node_modules/*.d.ts",
+    "!**/node_modules/**/*.ts",
+    "!**/node_modules/*/docs/**",
+    "!**/*.map",
+    "!**/node_modules/teddy/dist/teddy.{js,mjs,client.cjs,client.mjs,min.js,min.mjs}",
+    "!**/{.nycrc,.eslintrc*,.prettierrc*,.npmignore,tsconfig*.json}",
     "!**/node_modules/.bin",
     "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-    "!.editorconfig",
+    "!{.editorconfig,.stylelintrc.json}",
     "!**/._*",
     "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
     "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
@@ -23,7 +27,13 @@
     "!**/test*",
     "!**/*.scss",
     "!**/renderer/*.js",
-    "!**/renovate.json"
+    "!**/renovate.json",
+    "!playwright.config.js",
+    "!{test-results,playwright-report}/**",
+    "!{tmp,media}/**"
+  ],
+  "electronLanguages": [
+    "en"
   ],
   "linux": {
     "target": [
@@ -50,7 +60,8 @@
     ],
     "category": "Utility",
     "maintainer": "Autre31415",
-    "artifactName": "${productName}-${version}-linux-${arch}.${ext}"
+    "artifactName": "${productName}-${version}-linux-${arch}.${ext}",
+    "syncDesktopName": true
   },
   "mac": {
     "target": [

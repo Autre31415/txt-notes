@@ -1,5 +1,5 @@
 <!-- List of notes -->
 
 <loop through='txtFiles' val='file'>
-  <li class='fileName'>{file.name}</li>
+  <li class='fileName' data-file='{file.fileName}' if-file.pinned true='data-pinned'>{file.name}</li>
 </loop>

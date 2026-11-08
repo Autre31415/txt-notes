@@ -1,40 +1,40 @@
 {
   "name": "txt-notes",
-  "version": "0.3.10",
+  "version": "0.4.0",
   "description": "A no frills note taking app that works with txt files",
   "main": "main.js",
+  "desktopName": "txt-notes.desktop",
   "author": "Troy Coutu",
   "license": "CC0-1.0",
   "dependencies": {
-    "dayjs": "1.11.19",
-    "electron-context-menu": "4.1.1",
-    "electron-store": "11.0.2",
+    "electron-context-menu": "5.1.0",
     "electron-window-state": "5.0.3",
-    "fs-extra": "11.3.2",
-    "klaw": "4.1.0",
     "split-grid": "1.0.11",
-    "teddy": "1.1.4"
+    "teddy": "2.3.2"
   },
   "devDependencies": {
-    "@electron/asar": "4.0.1",
-    "cross-env": "10.1.0",
-    "electron": "39.1.1",
-    "electron-builder": "26.0.12",
+    "@electron/asar": "4.3.1",
+    "@playwright/test": "1.65.0",
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0",
     "electron-reloader": "1.2.3",
     "standard": "17.1.2",
-    "stylelint": "16.25.0",
-    "stylelint-config-standard": "39.0.1"
+    "stylelint": "18.0.0",
+    "stylelint-config-standard": "41.0.0"
   },
   "scripts": {
     "start": "electron .",
     "build": "node build/build.js",
-    "build-self": "cross-env BUILD_TARGET=self node build/build.js",
-    "build-lin": "cross-env BUILD_TARGET=lin node build/build.js",
-    "build-mac": "cross-env BUILD_TARGET=mac node build/build.js",
-    "build-win": "cross-env BUILD_TARGET=win node build/build.js",
+    "build-self": "node build/build.js self",
+    "build-lin": "node build/build.js linux",
+    "build-mac": "node build/build.js mac",
+    "build-win": "node build/build.js win",
     "unpack-mac": "rm -rf asar-unpack && asar extract dist/mac/*.app/Contents/Resources/app.asar ./asar-unpack",
     "lint": "standard && stylelint *.css",
     "lint-fix": "standard --fix && stylelint *.css --fix",
-    "test": "npm run lint"
+    "test": "npm run lint && playwright test"
+  },
+  "allowScripts": {
+    "electron-winstaller": false
   }
 }
