@@ -1,14 +1,61 @@
+/* colors for the dark theme, which is the default, and the light theme below */
+:root {
+  color-scheme: dark;
+
+  --background: #363636;
+  --header: #2b2f31;
+  --button: #454545;
+  --button-active: #757575;
+  --icon: #fff;
+  --text: #fff;
+  --muted: gray;
+  --input: #3c3c3c;
+  --list: #252526;
+  --list-text: #ccc;
+  --dimmed: #868687;
+  --editor: #1e1e1e;
+  --gutter: #1e1e1e;
+  --divider: #454545;
+  --highlight: #0f517b;
+  --find-match: rgb(255 200 0 / 30%);
+  --find-current: rgb(255 140 0 / 70%);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+
+    --background: #f3f3f3;
+    --header: #dcdcdc;
+    --button: #c4c4c4;
+    --button-active: #a6a6a6;
+    --icon: #333;
+    --text: #1e1e1e;
+    --muted: #777;
+    --input: #fff;
+    --list: #f3f3f3;
+    --list-text: #333;
+    --dimmed: #999;
+    --editor: #fff;
+    --gutter: #dcdcdc;
+    --divider: #ccc;
+    --highlight: #c5dcf2;
+    --find-match: rgb(255 200 0 / 40%);
+    --find-current: rgb(255 140 0 / 60%);
+  }
+}
+
 html,
 body,
 main {
   margin: 0;
   height: 100%;
   font-family: Helvetica, sans-serif;
-  background-color: #363636;
+  background-color: var(--background);
 }
 
 header {
-  background-color: #2b2f31;
+  background-color: var(--header);
   height: 35px;
   user-select: none;
 }
@@ -32,22 +79,29 @@ nav menu {
 nav button {
   app-region: no-drag;
   cursor: pointer;
-  background-color: #454545;
-  color: #fff;
-  font-weight: 700;
+  background-color: var(--button);
   height: 25px;
   width: 25px;
+  padding: 0; /* so the icon centers in the whole button */
   border: none;
   border-radius: 5px;
-  background-size: 15px;
-  background-repeat: no-repeat;
-  background-position: center;
   margin-top: 6px;
   outline: none;
 }
 
+/* icons are masks filled with the theme's icon color */
+nav button::before {
+  content: '';
+  display: block;
+  width: 15px;
+  height: 15px;
+  margin: auto;
+  background-color: var(--icon);
+  mask: var(--icon-image) center / contain no-repeat;
+}
+
 nav h1 {
-  color: gray;
+  color: var(--muted);
   display: inline;
   flex: 1 1 auto;
   font-size: 13px;
@@ -65,7 +119,7 @@ nav h1 {
 }
 
 #chooseBaseDir {
-  color: #e2e2e2;
+  color: var(--text);
   text-align: center;
   height: 200px;
   width: 500px;
@@ -75,62 +129,76 @@ nav h1 {
 }
 
 #dirPicker {
-  color: white;
+  color: var(--text);
   border-radius: 20px;
-  background-color: #505050;
-  border: solid 1px white;
+  background-color: var(--button);
+  border: solid 1px var(--text);
   width: 400px;
   height: 100px;
 }
 
 button:active {
-  background-color: #757575;
+  background-color: var(--button-active);
 }
 
 #addFile {
-  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 42 42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m37.059 16h-11.059v-11.059c0-2.717-2.282-4.941-5-4.941s-5 2.224-5 4.941v11.059h-11.059c-2.717 0-4.941 2.282-4.941 5s2.224 5 4.941 5h11.059v11.059c0 2.717 2.282 4.941 5 4.941s5-2.224 5-4.941v-11.059h11.059c2.717 0 4.941-2.282 4.941-5s-2.224-5-4.941-5z"/></svg>');
+  --icon-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 42 42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m37.059 16h-11.059v-11.059c0-2.717-2.282-4.941-5-4.941s-5 2.224-5 4.941v11.059h-11.059c-2.717 0-4.941 2.282-4.941 5s2.224 5 4.941 5h11.059v11.059c0 2.717 2.282 4.941 5 4.941s5-2.224 5-4.941v-11.059h11.059c2.717 0 4.941-2.282 4.941-5s-2.224-5-4.941-5z"/></svg>');
 }
 
 #removeFile {
-  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 42 42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m37.059 16h-11.059-10-11.059c-2.717 0-4.941 2.282-4.941 5s2.224 5 4.941 5h11.059 10 11.059c2.717 0 4.941-2.282 4.941-5s-2.224-5-4.941-5z"/></svg>');
+  --icon-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 42 42" viewBox="0 0 42 42" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m37.059 16h-11.059-10-11.059c-2.717 0-4.941 2.282-4.941 5s2.224 5 4.941 5h11.059 10 11.059c2.717 0 4.941-2.282 4.941-5s-2.224-5-4.941-5z"/></svg>');
 }
 
 #saveFile {
-  background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m172 522c0-.553.448-1 1-1s1 .447 1 1v4c0 .553-.448 1-1 1s-1-.447-1-1zm-9 7h14c.552 0 1-.447 1-1v-11h-16v11c0 .553.448 1 1 1zm19-12h-2v12c0 1.104-.896 2-2 2h-16c-1.104 0-2-.896-2-2v-12h-2c-2.209 0-4 1.791-4 4v24c0 2.209 1.791 4 4 4h24c2.209 0 4-1.791 4-4v-24c0-2.209-1.791-4-4-4z" fill-rule="evenodd" transform="translate(-154 -517)"/></svg>');
+  --icon-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m172 522c0-.553.448-1 1-1s1 .447 1 1v4c0 .553-.448 1-1 1s-1-.447-1-1zm-9 7h14c.552 0 1-.447 1-1v-11h-16v11c0 .553.448 1 1 1zm19-12h-2v12c0 1.104-.896 2-2 2h-16c-1.104 0-2-.896-2-2v-12h-2c-2.209 0-4 1.791-4 4v24c0 2.209 1.791 4 4 4h24c2.209 0 4-1.791 4-4v-24c0-2.209-1.791-4-4-4z" fill-rule="evenodd" transform="translate(-154 -517)"/></svg>');
 }
 
 #refreshButton {
-  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 32 32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m28 16c-1.219 0-1.797.859-2 1.766-.731 3.264-3.833 8.234-10 8.234-5.523 0-10-4.478-10-10s4.477-10 10-10c2.24 0 4.295.753 5.96 2h-1.96c-1.104 0-2 .896-2 2s.896 2 2 2h6c1.104 0 2-.896 2-2v-6c0-1.104-.896-2-2-2s-2 .896-2 2v.518c-2.267-1.586-5.023-2.518-8-2.518-7.732 0-14 6.268-14 14s6.268 14 14 14c9.979 0 14-9.5 14-11.875 0-1.453-1.062-2.125-2-2.125z"/></svg>');
+  --icon-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 32 32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m28 16c-1.219 0-1.797.859-2 1.766-.731 3.264-3.833 8.234-10 8.234-5.523 0-10-4.478-10-10s4.477-10 10-10c2.24 0 4.295.753 5.96 2h-1.96c-1.104 0-2 .896-2 2s.896 2 2 2h6c1.104 0 2-.896 2-2v-6c0-1.104-.896-2-2-2s-2 .896-2 2v.518c-2.267-1.586-5.023-2.518-8-2.518-7.732 0-14 6.268-14 14s6.268 14 14 14c9.979 0 14-9.5 14-11.875 0-1.453-1.062-2.125-2-2.125z"/></svg>');
 }
 
 #changeBaseDir {
-  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 510 510" viewBox="0 0 510 510" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m204 51h-153c-28.05 0-51 22.95-51 51v306c0 28.05 22.95 51 51 51h408c28.05 0 51-22.95 51-51v-255c0-28.05-22.95-51-51-51h-204z"/></svg>');
+  --icon-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 510 510" viewBox="0 0 510 510" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m204 51h-153c-28.05 0-51 22.95-51 51v306c0 28.05 22.95 51 51 51h408c28.05 0 51-22.95 51-51v-255c0-28.05-22.95-51-51-51h-204z"/></svg>');
+}
+
+#searchBox {
+  app-region: no-drag;
+  display: flex;
+  position: relative;
+  margin-right: 10px;
+}
+
+#searchBox::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: calc(50% - 7px);
+  width: 15px;
+  height: 15px;
+  pointer-events: none;
+  background-color: var(--icon);
+  mask: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 512.005 512.005" viewBox="0 0 512.005 512.005" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m505.749 475.587-145.6-145.6c28.203-34.837 45.184-79.104 45.184-127.317 0-111.744-90.923-202.667-202.667-202.667s-202.666 90.922-202.666 202.666 90.923 202.667 202.667 202.667c48.213 0 92.48-16.981 127.317-45.184l145.6 145.6c4.16 4.16 9.621 6.251 15.083 6.251s10.923-2.091 15.083-6.251c8.341-8.341 8.341-21.824-.001-30.165zm-303.082-112.918c-88.235 0-160-71.765-160-160s71.765-160 160-160 160 71.765 160 160-71.766 160-160 160z"/></svg>') center / contain no-repeat;
 }
 
 #search {
-  app-region: no-drag;
-  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 512.005 512.005" viewBox="0 0 512.005 512.005" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m505.749 475.587-145.6-145.6c28.203-34.837 45.184-79.104 45.184-127.317 0-111.744-90.923-202.667-202.667-202.667s-202.666 90.922-202.666 202.666 90.923 202.667 202.667 202.667c48.213 0 92.48-16.981 127.317-45.184l145.6 145.6c4.16 4.16 9.621 6.251 15.083 6.251s10.923-2.091 15.083-6.251c8.341-8.341 8.341-21.824-.001-30.165zm-303.082-112.918c-88.235 0-160-71.765-160-160s71.765-160 160-160 160 71.765 160 160-71.766 160-160 160z"/></svg>');
-  background-repeat: no-repeat;
-  background-size: 15px;
-  background-position: left 3px center;
   width: 200px;
   padding-left: 23px;
   height: 23px;
-  background-color: #3c3c3c;
-  color: white;
+  background-color: var(--input);
+  color: var(--text);
   outline: none;
   box-shadow: none;
   border: none;
   border-radius: 5px;
-  vertical-align: top;
-  margin-right: 10px;
 }
 
 #search::-webkit-search-cancel-button {
   appearance: none;
   height: 10px;
   width: 10px;
-  background-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 512.001 512.001" viewBox="0 0 512.001 512.001" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m284.286 256.002 221.857-221.858c7.811-7.811 7.811-20.475 0-28.285s-20.475-7.811-28.285 0l-221.858 221.858-221.857-221.858c-7.811-7.811-20.475-7.811-28.285 0s-7.811 20.475 0 28.285l221.857 221.857-221.857 221.858c-7.811 7.811-7.811 20.475 0 28.285 3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857l221.856-221.857 221.857 221.857c3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857c7.811-7.811 7.811-20.475 0-28.285z"/></svg>');
+  margin-right: 4px;
+  background-color: var(--icon);
+  mask: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 512.001 512.001" viewBox="0 0 512.001 512.001" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m284.286 256.002 221.857-221.858c7.811-7.811 7.811-20.475 0-28.285s-20.475-7.811-28.285 0l-221.858 221.858-221.857-221.858c-7.811-7.811-20.475-7.811-28.285 0s-7.811 20.475 0 28.285l221.857 221.857-221.857 221.858c-7.811 7.811-7.811 20.475 0 28.285 3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857l221.856-221.857 221.857 221.857c3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857c7.811-7.811 7.811-20.475 0-28.285z"/></svg>') center / contain no-repeat;
 }
 
 .split {
@@ -139,7 +207,7 @@ button:active {
 }
 
 .gutter {
-  background-color: #1e1e1e;
+  background-color: var(--gutter);
   cursor: col-resize;
 }
 
@@ -149,30 +217,131 @@ button:active {
 }
 
 #txtFileList {
-  background-color: #252526;
-  color: #ccc;
+  background-color: var(--list);
+  color: var(--list-text);
 }
 
 .renaming {
-  color: #868687;
+  color: var(--dimmed);
 }
 
 #txtFileView {
-  background-color: #1e1e1e;
+  position: relative;
+  background-color: var(--editor);
 }
 
-#txtFileView textarea {
-  width: calc(100% - 10px);
-  height: calc(100% - 36px);
+/* the editor and the find highlights behind it share one spot and lay out text identically */
+#editor {
+  display: grid;
+  height: calc(100% - 26px);
+}
+
+#editor > * {
+  grid-area: 1 / 1;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   padding: 5px;
   border: 0;
   margin: 0;
+  font: 14px monospace;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  overflow-y: auto;
+}
+
+#fileEditor {
   resize: none;
   box-shadow: none;
-  font-size: 14px;
   outline: none;
-  background-color: #1e1e1e;
-  color: white;
+  background-color: transparent;
+  color: var(--text);
+}
+
+#findHighlights {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+#findHighlights mark {
+  color: transparent;
+  background-color: var(--find-match);
+}
+
+#findHighlights mark.current {
+  background-color: var(--find-current);
+}
+
+#findBar {
+  position: absolute;
+  top: 24px; /* below the last modified date */
+  right: 12px;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 5px;
+  background-color: var(--header);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 30%);
+}
+
+#findBar:not([hidden]) {
+  display: flex;
+}
+
+#findInput {
+  width: 160px;
+  height: 20px;
+  padding: 0 6px;
+  border: none;
+  border-radius: 4px;
+  outline: none;
+  background-color: var(--input);
+  color: var(--text);
+}
+
+#findCount {
+  min-width: 60px;
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+}
+
+#findBar button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background-color: transparent;
+  cursor: pointer;
+}
+
+#findBar button:hover {
+  background-color: var(--button);
+}
+
+#findBar button::before {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: auto;
+  background-color: var(--icon);
+  mask: var(--icon-image) center / contain no-repeat;
+}
+
+#findPrevious {
+  --icon-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m2 11 6-6 6 6" fill="none" stroke="%23fff" stroke-width="2.5"/></svg>');
+}
+
+#findNext {
+  --icon-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="m2 5 6 6 6-6" fill="none" stroke="%23fff" stroke-width="2.5"/></svg>');
+}
+
+#findClose {
+  --icon-image: url('data:image/svg+xml;utf8,<svg enable-background="new 0 0 512.001 512.001" viewBox="0 0 512.001 512.001" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m284.286 256.002 221.857-221.858c7.811-7.811 7.811-20.475 0-28.285s-20.475-7.811-28.285 0l-221.858 221.858-221.857-221.858c-7.811-7.811-20.475-7.811-28.285 0s-7.811 20.475 0 28.285l221.857 221.857-221.857 221.858c-7.811 7.811-7.811 20.475 0 28.285 3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857l221.856-221.857 221.857 221.857c3.905 3.905 9.024 5.857 14.143 5.857s10.237-1.952 14.143-5.857c7.811-7.811 7.811-20.475 0-28.285z"/></svg>');
 }
 
 ul {
@@ -189,10 +358,31 @@ ul li {
   user-select: none;
 }
 
+ul li[data-pinned] {
+  position: relative;
+  padding-right: 20px;
+}
+
+ul li[data-pinned]::after {
+  content: '';
+  position: absolute;
+  right: 6px;
+  top: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  background-color: var(--icon);
+  mask: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="%23fff" d="m16 2 6 6-2 1-4 4 1 5-2 2-4-4-6 6-1-1 6-6-4-4 2-2 5 1 4-4z"/></svg>') center / contain no-repeat;
+}
+
+/* separate pinned notes from the rest */
+ul li[data-pinned] + li:not([data-pinned]) {
+  border-top: 1px solid var(--divider);
+}
+
 .fileNameEdit {
   width: calc(100% - 2px);
-  background-color: #3c3c3c;
-  color: white;
+  background-color: var(--input);
+  color: var(--text);
   outline: none;
   box-shadow: none;
   border: none;
@@ -200,7 +390,7 @@ ul li {
 }
 
 .highlight {
-  background-color: #0f517b !important;
+  background-color: var(--highlight) !important;
 }
 
 .edited {
@@ -220,7 +410,7 @@ input:valid {
   margin: 0;
   padding-top: 2px;
   text-align: center;
-  color: gray;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -229,7 +419,7 @@ input:valid {
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #363636;
+  background-color: var(--background);
 }
 
 #printArea {

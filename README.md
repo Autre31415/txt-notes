@@ -1,6 +1,6 @@
 # txt-notes
 
-A simple note taking app that takes cues from Apple notes and popular code editors such as Brackets, VS-Code, and Atom.
+A simple note taking app that takes cues from Apple notes and popular code editors such as Brackets, VS Code, and Atom.
 
 ![This app finally has a screenshot](media/screenshot.png)
 

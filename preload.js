@@ -1,5 +1,5 @@
 process.once('loaded', () => {
-  const { contextBridge, ipcRenderer: ipc } = require('electron')
+  const { contextBridge, ipcRenderer: ipc, webUtils } = require('electron')
 
   contextBridge.exposeInMainWorld('electron', {
     addNote: async (...params) => await ipc.invoke('addNote', ...params),
@@ -8,15 +8,19 @@ process.once('loaded', () => {
     directoryPicker: async () => await ipc.invoke('directoryPicker'),
     elementIsFile: async (...params) => await ipc.invoke('elementIsFile', ...params),
     exitApp: async () => await ipc.invoke('exit'),
+    exportNote: async (...params) => await ipc.invoke('exportNote', ...params),
     fileExists: async (...params) => await ipc.invoke('fileExists', ...params),
     gatherNotes: async (...params) => await ipc.invoke('gatherNotes', ...params),
     getNoteInfo: async (...params) => await ipc.invoke('getNoteInfo', ...params),
+    getPathForFile: file => webUtils.getPathForFile(file),
+    importNote: async (...params) => await ipc.invoke('importNote', ...params),
     listen: callback => ipc.on('ping', callback),
     platform: async () => await ipc.invoke('platform'),
     printNote: async (...params) => await ipc.invoke('printNote', ...params),
     removeHandler: async (...params) => await ipc.invoke('removeHandler', ...params),
     renameHandler: async (...params) => await ipc.invoke('renameHandler', ...params),
     renderTemplate: async (...params) => await ipc.invoke('renderTemplate', ...params),
+    showInFolder: async (...params) => await ipc.invoke('showInFolder', ...params),
     storeGet: async (...params) => await ipc.invoke('storeGet', ...params),
     storeSet: (...params) => ipc.send('storeSet', ...params),
     updateNote: async (...params) => await ipc.invoke('updateNote', ...params),
