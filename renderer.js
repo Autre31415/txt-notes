@@ -41,6 +41,13 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
   let findMatches = []
   let findIndex = 0
 
+  // the note list width that was chosen, which narrow windows can temporarily override
+  let listWidth
+
+  // narrowest the note list and editor can get
+  const minListWidth = 120
+  const minEditorWidth = 250
+
   // printable area
   let printArea
 
@@ -257,6 +264,8 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     }
   })
 
+  window.addEventListener('resize', fitColumns)
+
   window.addEventListener('mousedown', async event => {
     if (event.button === 2) {
       await electron.elementIsFile(elementIsFile(event.target), elementIsFileList(event.target), event.target.hasAttribute('data-pinned'))
@@ -364,14 +373,17 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
     findCount = document.getElementById('findCount')
     findHighlights = document.getElementById('findHighlights')
 
-    grid.style['grid-template-columns'] = await electron.storeGet('columnSize') || '200px 2px 1fr'
+    listWidth = parseInt(await electron.storeGet('columnSize')) || 200
+    fitColumns()
 
     Split({
       columnGutters: [{
         track: 1,
         element: document.querySelector('.gutter')
       }],
+      columnMinSizes: { 0: minListWidth, 2: minEditorWidth },
       onDragEnd: async () => {
+        listWidth = parseInt(grid.style['grid-template-columns'])
         electron.storeSet('columnSize', grid.style['grid-template-columns'])
       }
     })
@@ -1334,6 +1346,19 @@ import Split from './node_modules/split-grid/dist/split-grid.mjs'
    */
   function updateLastModified () {
     lastModified.textContent = new Date(currentFile.modifyDate).toLocaleString(undefined, { dateStyle: 'long', timeStyle: 'short' })
+  }
+
+  /**
+   * Size the note list to its chosen width while leaving room for the editor
+   */
+  function fitColumns () {
+    const grid = document.querySelector('#grid')
+
+    // the first run screen has no panes to fit
+    if (grid) {
+      const width = Math.max(minListWidth, Math.min(listWidth, window.innerWidth - minEditorWidth))
+      grid.style['grid-template-columns'] = `${width}px 2px 1fr`
+    }
   }
 
   function elementIsFile (element) {

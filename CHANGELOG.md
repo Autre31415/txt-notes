@@ -1,5 +1,12 @@
 # txt-notes Changelog
 
+## 0.4.1 (11/08/2026)
+
+- Reorganized the note context menu for clarity.
+- Fixed layout issues that could occur on small window sizes.
+- Tweaked some icons to reduce pixelation.
+- Updated dependencies.
+
 ## 0.4.0 (11/08/2026)
 
 - Added the ability to search within the currently opened note, with full match highlighting and navigation tools.
